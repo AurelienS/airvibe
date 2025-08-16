@@ -19,9 +19,31 @@ export default async function HomePage() {
       </div>
       <div className="mt-8 space-y-2">
         <p>Connecté en tant que: {session?.user?.email ?? "inconnu"}</p>
-        <div className="rounded-lg border p-4">Contenu protégé (dummy)</div>
+        <div className="rounded-lg border p-4">
+          <UploadFlightsForm />
+        </div>
       </div>
     </div>
+  );
+}
+
+function UploadFlightsForm() {
+  return (
+    <form className="space-y-3" action="/api/flights" method="POST" encType="multipart/form-data">
+      <div>
+        <label className="block text-sm font-medium mb-1">Importer des vols (.igc ou .zip)</label>
+        <input
+          type="file"
+          name="files"
+          multiple
+          accept=".igc,.zip,application/zip"
+          className="block w-full text-sm"
+        />
+      </div>
+      <button type="submit" className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm">
+        Importer
+      </button>
+    </form>
   );
 }
 
