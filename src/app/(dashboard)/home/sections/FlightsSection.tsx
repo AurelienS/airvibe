@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { processUnprocessedFlightsForUser } from "@/services/flightProcessing";
-import { formatAltitude, formatDistance, formatDuration } from "@/lib/format";
+import { FlightListItem } from "./FlightListItem";
 
 type FlightsSectionProps = {
   email: string | null | undefined;
@@ -22,6 +22,7 @@ export async function FlightsSection({ email }: FlightsSectionProps) {
       durationSeconds: true,
       distanceMeters: true,
       altitudeMaxMeters: true,
+      startAt: true,
     },
   });
 
@@ -73,34 +74,16 @@ export async function FlightsSection({ email }: FlightsSectionProps) {
       ) : (
         <ul className="divide-y">
           {flights.map((f) => (
-            <li key={f.id} className="py-2 flex items-center justify-between">
-              <div className="min-w-0">
-                {f.processed ? (
-                  <>
-                    <p className="text-sm font-medium truncate">
-                      {f.location ?? 'Lieu inconnu'}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {fmt.format(f.createdAt)} • {formatDuration(f.durationSeconds)} • {formatDistance(f.distanceMeters)} • {formatAltitude(f.altitudeMaxMeters)}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium truncate">{f.filename}</p>
-                    <p className="text-xs text-gray-500">{fmt.format(f.createdAt)}</p>
-                  </>
-                )}
-              </div>
-              <span
-                className={`text-xs px-2 py-1 rounded-md ${
-                  f.processed
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {f.processed ? "Traité" : "Non traité"}
-              </span>
-            </li>
+            <FlightListItem
+              key={f.id}
+              processed={f.processed}
+              filename={f.filename}
+              location={f.location}
+              dateIso={(f.processed ? (f.startAt ?? f.createdAt) : f.createdAt).toISOString()}
+              durationSeconds={f.durationSeconds}
+              distanceMeters={f.distanceMeters}
+              altitudeMaxMeters={f.altitudeMaxMeters}
+            />
           ))}
         </ul>
       )}

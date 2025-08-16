@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Flight" ADD COLUMN "endAt" DATETIME;
+ALTER TABLE "Flight" ADD COLUMN "startAt" DATETIME;

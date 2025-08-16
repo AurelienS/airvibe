@@ -69,6 +69,8 @@ model Flight {
   distanceMeters      Int?
   altitudeMaxMeters   Int?
   faiDistanceMeters   Int?
+  startAt             DateTime?
+  endAt               DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

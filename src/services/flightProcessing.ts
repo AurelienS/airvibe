@@ -8,6 +8,8 @@ type ProcessedMetrics = {
   distanceMeters?: number | null;
   altitudeMaxMeters?: number | null;
   faiDistanceMeters?: number | null;
+  startAt?: Date | null;
+  endAt?: Date | null;
 };
 
 export function processIgc(rawIgc: string): ProcessedMetrics {
@@ -19,7 +21,10 @@ export function processIgc(rawIgc: string): ProcessedMetrics {
 
     const start = points[0];
     const end = points[points.length - 1];
-    const durationSeconds = Math.max(0, Math.floor((end.timestamp - start.timestamp) / 1000));
+    // IGC timestamps are UTC by spec; store Date objects in UTC
+    const startAt = new Date(start.timestamp);
+    const endAt = new Date(end.timestamp);
+    const durationSeconds = Math.max(0, Math.floor((endAt.getTime() - startAt.getTime()) / 1000));
 
     let distanceMeters = 0;
     let altitudeMaxMeters = Number.NEGATIVE_INFINITY;
@@ -52,6 +57,8 @@ export function processIgc(rawIgc: string): ProcessedMetrics {
       distanceMeters: Math.round(distanceMeters),
       altitudeMaxMeters: altitudeMaxMeters as number | null,
       faiDistanceMeters,
+      startAt,
+      endAt,
     };
   } catch {
     return {};
