@@ -85,4 +85,33 @@ export async function processUnprocessedFlightsForUser(userId: string, batchSize
   return results.length;
 }
 
+export function extractStartAt(rawIgc: string): Date | null {
+  try {
+    const parsed = IGCParser.parse(rawIgc, { lenient: true });
+    const points = parsed.fixes ?? [];
+    if (points.length === 0) return null;
+    const ts = (points[0] as any).timestamp;
+    return ts instanceof Date ? ts : new Date(ts);
+  } catch {
+    return null;
+  }
+}
+
+export async function backfillStartAtForUser(userId: string, batchSize = 200): Promise<number> {
+  const missing = await prisma.flight.findMany({
+    where: { userId, processed: true, startAt: null },
+    select: { id: true, rawIgc: true },
+    take: batchSize,
+  });
+  if (missing.length === 0) return 0;
+  const updates = missing.map(async (f) => {
+    const startAt = extractStartAt(f.rawIgc);
+    if (!startAt) return null;
+    await prisma.flight.update({ where: { id: f.id }, data: { startAt } });
+    return f.id;
+  });
+  const done = await Promise.all(updates);
+  return done.filter(Boolean).length;
+}
+
 

@@ -1,18 +1,19 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { processUnprocessedFlightsForUser } from "@/services/flightProcessing";
+import { backfillStartAtForUser, processUnprocessedFlightsForUser } from "@/services/flightProcessing";
 import { FlightListItem } from "./FlightListItem";
+import IGCParser from "igc-parser";
 
 type FlightsSectionProps = {
   email: string | null | undefined;
 };
 
-export async function FlightsSection({ email }: FlightsSectionProps) {
+export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps & { limit?: number }) {
   if (!email) return null;
   const flights = await prisma.flight.findMany({
     where: { user: { email } },
-    orderBy: { createdAt: "desc" },
-    take: 50,
+    orderBy: [{ createdAt: "desc" }],
+    take: limit,
     select: {
       id: true,
       createdAt: true,
@@ -22,7 +23,7 @@ export async function FlightsSection({ email }: FlightsSectionProps) {
       durationSeconds: true,
       distanceMeters: true,
       altitudeMaxMeters: true,
-      startAt: true,
+      rawIgc: true,
     },
   });
 
@@ -47,6 +48,7 @@ export async function FlightsSection({ email }: FlightsSectionProps) {
             const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
             if (user) {
               await processUnprocessedFlightsForUser(user.id, 50);
+              await backfillStartAtForUser(user.id, 500);
             }
             revalidatePath('/home');
           }}>
@@ -73,18 +75,38 @@ export async function FlightsSection({ email }: FlightsSectionProps) {
         <p className="text-sm text-gray-500">Aucun vol importé.</p>
       ) : (
         <ul className="divide-y">
-          {flights.map((f) => (
-            <FlightListItem
-              key={f.id}
-              processed={f.processed}
-              filename={f.filename}
-              location={f.location}
-              dateIso={(f.processed ? (f.startAt ?? f.createdAt) : f.createdAt).toISOString()}
-              durationSeconds={f.durationSeconds}
-              distanceMeters={f.distanceMeters}
-              altitudeMaxMeters={f.altitudeMaxMeters}
-            />
-          ))}
+          {(() => {
+            const withDate = flights.map((f) => {
+              let startAt: Date | null = null;
+              if (f.processed && f.rawIgc) {
+                try {
+                  const parsed = IGCParser.parse(f.rawIgc, { lenient: true });
+                  const points = parsed.fixes ?? [];
+                  if (points.length > 0) {
+                    const ts = (points[0] as any).timestamp;
+                    startAt = ts instanceof Date ? ts : new Date(ts);
+                  }
+                } catch {
+                  startAt = null;
+                }
+              }
+              const date = startAt ?? f.createdAt;
+              return { f, date };
+            });
+            withDate.sort((a, b) => b.date.getTime() - a.date.getTime());
+            return withDate.map(({ f, date }) => (
+              <FlightListItem
+                key={f.id}
+                processed={f.processed}
+                filename={f.filename}
+                location={f.location}
+                dateIso={date.toISOString()}
+                durationSeconds={f.durationSeconds}
+                distanceMeters={f.distanceMeters}
+                altitudeMaxMeters={f.altitudeMaxMeters}
+              />
+            ));
+          })()}
         </ul>
       )}
     </div>
