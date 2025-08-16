@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import JSZip from "jszip";
 import IGCParser from "igc-parser";
+import crypto from "node:crypto";
 
 export const runtime = "nodejs";
 
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
   }
 
   const created: Array<{ id: string; filename: string }> = [];
+  let skippedDuplicates = 0;
   for (const file of igcFiles) {
     try {
       // Validate file parses as IGC before storing
@@ -67,11 +69,24 @@ export async function POST(req: NextRequest) {
       continue;
     }
 
+    const contentHash = crypto.createHash("sha256").update(file.content).digest("hex");
+
+    // Check duplicate for this user
+    const existing = await prisma.flight.findFirst({
+      where: { userId: user.id, contentHash },
+      select: { id: true },
+    });
+    if (existing) {
+      skippedDuplicates += 1;
+      continue;
+    }
+
     const flight = await prisma.flight.create({
       data: {
         userId: user.id,
         filename: file.name,
         rawIgc: file.content,
+        contentHash,
         processed: false,
       },
       select: { id: true, filename: true },
@@ -83,7 +98,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No valid IGC files" }, { status: 400 });
   }
 
-  return NextResponse.json({ flights: created }, { status: 201 });
+  return NextResponse.json({ flights: created, skippedDuplicates }, { status: 201 });
 }
 
 

@@ -62,6 +62,7 @@ model Flight {
   userId              String
   filename            String
   rawIgc              String
+  contentHash         String?
   processed           Boolean  @default(false)
   location            String?
   durationSeconds     Int?
@@ -74,4 +75,5 @@ model Flight {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@unique([userId, contentHash])
 }

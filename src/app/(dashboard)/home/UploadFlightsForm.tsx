@@ -7,6 +7,7 @@ export default function UploadFlightsForm() {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,6 +36,10 @@ export default function UploadFlightsForm() {
         }
         throw new Error(message);
       }
+      const data = (await res.json()) as { flights?: Array<{ id: string; filename: string }>; skippedDuplicates?: number };
+      const added = data.flights?.length ?? 0;
+      const skipped = data.skippedDuplicates ?? 0;
+      setSummary(`${added} vol(s) ajouté(s), ${skipped} doublon(s) ignoré(s)`);
       form.reset();
       router.refresh();
     } catch (err) {
@@ -65,6 +70,7 @@ export default function UploadFlightsForm() {
           {isUploading ? 'Import en cours…' : 'Importer'}
         </button>
         {error ? <span className="text-xs text-red-600">{error}</span> : null}
+        {summary ? <span className="text-xs text-gray-700">{summary}</span> : null}
       </div>
     </form>
   );
