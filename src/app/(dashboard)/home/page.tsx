@@ -1,4 +1,6 @@
 import { auth, signOut } from "@/auth";
+import { prisma } from "@/lib/db";
+import UploadFlightsForm from "./UploadFlightsForm";
 
 export default async function HomePage() {
   const session = await auth();
@@ -19,6 +21,7 @@ export default async function HomePage() {
       </div>
       <div className="mt-8 space-y-2">
         <p>Connecté en tant que: {session?.user?.email ?? "inconnu"}</p>
+        <FlightsSection email={session?.user?.email} />
         <div className="rounded-lg border p-4">
           <UploadFlightsForm />
         </div>
@@ -27,23 +30,38 @@ export default async function HomePage() {
   );
 }
 
-function UploadFlightsForm() {
+async function FlightsSection({ email }: { email: string | null | undefined }) {
+  if (!email) return null;
+  const flights = await prisma.flight.findMany({
+    where: { user: { email } },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: { id: true, createdAt: true, processed: true, filename: true },
+  });
+
+  const fmt = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+
   return (
-    <form className="space-y-3" action="/api/flights" method="POST" encType="multipart/form-data">
-      <div>
-        <label className="block text-sm font-medium mb-1">Importer des vols (.igc ou .zip)</label>
-        <input
-          type="file"
-          name="files"
-          multiple
-          accept=".igc,.zip,application/zip"
-          className="block w-full text-sm"
-        />
-      </div>
-      <button type="submit" className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm">
-        Importer
-      </button>
-    </form>
+    <div className="rounded-lg border p-4">
+      <h2 className="text-lg font-medium mb-3">Vos vols</h2>
+      {flights.length === 0 ? (
+        <p className="text-sm text-gray-500">Aucun vol importé.</p>
+      ) : (
+        <ul className="divide-y">
+          {flights.map((f) => (
+            <li key={f.id} className="py-2 flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{f.filename}</p>
+                <p className="text-xs text-gray-500">Ajouté: {fmt.format(f.createdAt)}</p>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded-md ${f.processed ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"}`}>
+                {f.processed ? "Traité" : "Non traité"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
