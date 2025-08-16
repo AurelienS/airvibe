@@ -1,27 +1,29 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export default function UploadFlightsForm() {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const triggerPicker = () => {
     setError(null);
+    inputRef.current?.click();
+  };
+
+  const onFilesChosen = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.currentTarget.files;
+    if (!files || files.length === 0) return;
     setIsUploading(true);
+    setError(null);
     try {
-      const form = e.currentTarget;
-      const elements = form.elements as unknown as HTMLFormControlsCollection;
-      const fileInput = (elements.namedItem('files') ?? null) as HTMLInputElement | null;
       const formData = new FormData();
-      if (fileInput?.files) {
-        for (const file of Array.from(fileInput.files)) {
-          formData.append('files', file);
-        }
+      for (const file of Array.from(files)) {
+        formData.append('files', file);
       }
       const res = await fetch('/api/flights', {
         method: 'POST',
@@ -52,39 +54,44 @@ export default function UploadFlightsForm() {
         return 0;
       })();
       setSummary(`${added} vol(s) ajouté(s), ${skipped} doublon(s) ignoré(s)`);
-      form.reset();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setIsUploading(false);
+      // reset input so selecting same files again retriggers change
+      if (inputRef.current) inputRef.current.value = '';
     }
   };
 
   return (
-    <form className="space-y-3" onSubmit={onSubmit} noValidate>
+    <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium mb-1">Importer des vols (.igc ou .zip)</label>
+        <label className="block text-sm font-medium mb-2">Importer des vols (.igc ou .zip)</label>
         <input
+          ref={inputRef}
           type="file"
           name="files"
           multiple
           accept=".igc,.zip,application/zip"
-          className="block w-full text-sm"
+          className="sr-only"
+          onChange={onFilesChosen}
         />
-      </div>
-      <div className="flex items-center gap-3">
         <button
-          type="submit"
+          type="button"
+          onClick={triggerPicker}
           disabled={isUploading}
           className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm disabled:opacity-60"
+          aria-busy={isUploading}
         >
-          {isUploading ? 'Import en cours…' : 'Importer'}
+          {isUploading ? 'Import en cours…' : 'Choisir et importer'}
         </button>
+      </div>
+      <div className="flex items-center gap-3">
         {error ? <span className="text-xs text-red-600">{error}</span> : null}
         {summary ? <span className="text-xs text-gray-700">{summary}</span> : null}
       </div>
-    </form>
+    </div>
   );
 }
 
