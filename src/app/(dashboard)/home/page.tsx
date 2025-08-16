@@ -1,6 +1,7 @@
 import { auth, signOut } from "@/auth";
 import { prisma } from "@/lib/db";
 import UploadFlightsForm from "./UploadFlightsForm";
+import { revalidatePath } from "next/cache";
 
 export default async function HomePage() {
   const session = await auth();
@@ -43,7 +44,24 @@ async function FlightsSection({ email }: { email: string | null | undefined }) {
 
   return (
     <div className="rounded-lg border p-4">
-      <h2 className="text-lg font-medium mb-3">Vos vols</h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-medium">Vos vols</h2>
+        <form
+          action={async () => {
+            'use server';
+            await prisma.flight.deleteMany({ where: { user: { email } } });
+            revalidatePath('/home');
+          }}
+        >
+          <button
+            type="submit"
+            className="text-xs px-3 py-2 bg-red-600 text-white rounded-md disabled:opacity-60"
+            disabled={flights.length === 0}
+          >
+            Supprimer tous les vols
+          </button>
+        </form>
+      </div>
       {flights.length === 0 ? (
         <p className="text-sm text-gray-500">Aucun vol importé.</p>
       ) : (
