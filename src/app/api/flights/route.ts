@@ -7,9 +7,11 @@ import crypto from "node:crypto";
 
 export const runtime = "nodejs";
 
-async function extractIgcFilesFromZip(buffer: Buffer): Promise<Array<{ name: string; content: string }>> {
+type IgcFile = { name: string; content: string };
+
+async function extractIgcFilesFromZip(buffer: Buffer): Promise<Array<IgcFile>> {
   const zip = await JSZip.loadAsync(buffer);
-  const files: Array<{ name: string; content: string }> = [];
+  const files: Array<IgcFile> = [];
   for (const entry of Object.values(zip.files)) {
     if (entry.dir) continue;
     const lower = entry.name.toLowerCase();
@@ -20,9 +22,9 @@ async function extractIgcFilesFromZip(buffer: Buffer): Promise<Array<{ name: str
   return files;
 }
 
-async function getIgcFilesFromFormData(formData: FormData): Promise<Array<{ name: string; content: string }>> {
+async function getIgcFilesFromFormData(formData: FormData): Promise<Array<IgcFile>> {
   const filesField = formData.getAll("files");
-  const igcFiles: Array<{ name: string; content: string }> = [];
+  const igcFiles: Array<IgcFile> = [];
 
   for (const item of filesField) {
     if (!(item instanceof File)) continue;

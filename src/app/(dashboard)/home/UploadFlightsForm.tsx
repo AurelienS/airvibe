@@ -15,7 +15,8 @@ export default function UploadFlightsForm() {
     setIsUploading(true);
     try {
       const form = e.currentTarget;
-      const fileInput = form.elements.namedItem('files') as HTMLInputElement | null;
+      const elements = form.elements as unknown as HTMLFormControlsCollection;
+      const fileInput = (elements.namedItem('files') ?? null) as HTMLInputElement | null;
       const formData = new FormData();
       if (fileInput?.files) {
         for (const file of Array.from(fileInput.files)) {
@@ -36,9 +37,16 @@ export default function UploadFlightsForm() {
         }
         throw new Error(message);
       }
-      const data = (await res.json()) as { flights?: Array<{ id: string; filename: string }>; skippedDuplicates?: number };
-      const added = data.flights?.length ?? 0;
-      const skipped = data.skippedDuplicates ?? 0;
+      const data: unknown = await res.json();
+      const flights =
+        data && typeof data === 'object' && 'flights' in data && Array.isArray((data as any).flights)
+          ? ((data as { flights: Array<{ id: string; filename: string }>; skippedDuplicates?: number }).flights)
+          : [];
+      const skipped =
+        data && typeof data === 'object' && 'skippedDuplicates' in data && typeof (data as any).skippedDuplicates === 'number'
+          ? (data as { skippedDuplicates: number }).skippedDuplicates
+          : 0;
+      const added = flights.length;
       setSummary(`${added} vol(s) ajouté(s), ${skipped} doublon(s) ignoré(s)`);
       form.reset();
       router.refresh();

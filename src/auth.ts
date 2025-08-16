@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-// @ts-expect-error NextAuth typing can appear non-callable under bundler moduleResolution
+// @ts-expect-error next-auth call signature can be erased under certain bundler moduleResolution
 export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
   const isEdge = typeof (globalThis as Record<string, unknown>).EdgeRuntime !== "undefined";
   const base = {
