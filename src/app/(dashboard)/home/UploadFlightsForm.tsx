@@ -38,15 +38,19 @@ export default function UploadFlightsForm() {
         throw new Error(message);
       }
       const data: unknown = await res.json();
-      const flights =
-        data && typeof data === 'object' && 'flights' in data && Array.isArray((data as any).flights)
-          ? ((data as { flights: Array<{ id: string; filename: string }>; skippedDuplicates?: number }).flights)
-          : [];
       const skipped =
         data && typeof data === 'object' && 'skippedDuplicates' in data && typeof (data as any).skippedDuplicates === 'number'
           ? (data as { skippedDuplicates: number }).skippedDuplicates
           : 0;
-      const added = flights.length;
+      const added = (() => {
+        if (data && typeof data === 'object' && 'createdCount' in data && typeof (data as any).createdCount === 'number') {
+          return (data as { createdCount: number }).createdCount;
+        }
+        if (data && typeof data === 'object' && 'flights' in data && Array.isArray((data as any).flights)) {
+          return ((data as { flights: Array<unknown> }).flights).length;
+        }
+        return 0;
+      })();
       setSummary(`${added} vol(s) ajouté(s), ${skipped} doublon(s) ignoré(s)`);
       form.reset();
       router.refresh();
