@@ -15,8 +15,15 @@ export function FlightMap({ points }: { points: Array<LatLng> }) {
     if (!mapRef.current || leafletRef.current) return;
     const map = L.map(mapRef.current, { zoomControl: true });
     leafletRef.current = map;
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
+    // Topographic base layer (OpenTopoMap)
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 17,
+      attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
+    }).addTo(map);
+    // Hillshade overlay for better relief perception (SRTM)
+    L.tileLayer('https://tiles.wmflabs.org/hillshading/{z}/{x}/{y}.png', {
+      attribution: 'Hillshade: SRTM',
+      opacity: 0.4
     }).addTo(map);
   }, []);
 
