@@ -36,6 +36,7 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
       setItems(data.items);
       setNextCursor(data.nextCursor);
       setTotal(data.total);
+      try { window.dispatchEvent(new CustomEvent('flights:total', { detail: data.total })); } catch {}
     }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, location]);
@@ -75,6 +76,7 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
           setItems((prev) => [...prev, ...data.items]);
           setNextCursor(data.nextCursor);
           setTotal(data.total);
+          try { window.dispatchEvent(new CustomEvent('flights:total', { detail: data.total })); } catch {}
         }).catch(() => {
           setNextCursor(c); // restore so we can retry
         });

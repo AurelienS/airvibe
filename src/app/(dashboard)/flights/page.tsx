@@ -46,7 +46,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
         <h1 className="text-2xl font-semibold">Vols</h1>
       </div>
       <div className="mt-8 space-y-4">
-        <FlightsFilters locations={locations} total={rows.length} />
+        <FlightsFilters locations={locations} />
         <FlightsList flights={rows} />
       </div>
     </div>

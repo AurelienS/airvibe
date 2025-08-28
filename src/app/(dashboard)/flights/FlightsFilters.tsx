@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export function FlightsFilters({ locations, total }: { locations: Array<string>; total?: number }) {
+export function FlightsFilters({ locations }: { locations: Array<string> }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -47,6 +47,17 @@ export function FlightsFilters({ locations, total }: { locations: Array<string>;
     pushParams('', '');
   };
 
+  const [count, setCount] = useState<number | null>(null);
+  // Listen for total updates from the list component
+  useEffect(() => {
+    const onTotal = (e: Event) => {
+      const ce = e as CustomEvent;
+      if (typeof ce.detail === 'number') setCount(ce.detail as number);
+    };
+    window.addEventListener('flights:total', onTotal as EventListener);
+    return () => window.removeEventListener('flights:total', onTotal as EventListener);
+  }, []);
+
   return (
     <div className="rounded-lg border p-4">
       <h2 className="text-lg font-medium mb-3">Filtres</h2>
@@ -83,8 +94,8 @@ export function FlightsFilters({ locations, total }: { locations: Array<string>;
           </datalist>
         </div>
         <div className="ml-auto flex items-center gap-3">
-          {typeof total === 'number' ? (
-            <span className="text-sm text-gray-700">{total} vol(s)</span>
+          {typeof count === 'number' ? (
+            <span className="text-sm text-gray-700">{count} vol(s)</span>
           ) : null}
           <button type="button" onClick={reset} className="text-sm px-3 py-2 rounded-md bg-gray-100">Réinitialiser</button>
         </div>
