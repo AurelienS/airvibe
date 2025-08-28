@@ -2,12 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiClient } from "@/lib/apiClient";
 
 async function fetchStatus(): Promise<{ total: number; unprocessed: number } | null> {
   try {
-    const res = await fetch('/api/flights/status', { cache: 'no-store' });
-    if (!res.ok) return null;
-    return res.json();
+    return await apiClient.status();
   } catch {
     return null;
   }
@@ -43,7 +42,7 @@ export function ProcessingNotice() {
           }
         }
         // Proactively advance processing batches while active
-        try { await fetch('/api/flights/process', { method: 'POST', cache: 'no-store' }); } catch {}
+        try { await apiClient.processFlights(); } catch {}
         timerRef.current = setTimeout(tick, 1000);
       };
       await tick();

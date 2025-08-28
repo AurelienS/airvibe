@@ -3,6 +3,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { apiClient } from "@/lib/apiClient";
 import { FlightListItem } from "@/components/FlightListItem";
 
 type FlightRow = {
@@ -17,14 +18,7 @@ type FlightRow = {
 };
 
 async function fetchFlights(params: { year?: string; location?: string; cursor?: string | null; limit?: number }): Promise<{ items: Array<FlightRow>; nextCursor: string | null; total: number }> {
-  const sp = new URLSearchParams();
-  if (params.year) sp.set('year', params.year);
-  if (params.location) sp.set('location', params.location);
-  if (params.cursor) sp.set('cursor', params.cursor);
-  if (params.limit) sp.set('limit', String(params.limit));
-  const res = await fetch(`/api/flights/list?${sp.toString()}`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to load flights');
-  return res.json();
+  return apiClient.listFlights(params) as any;
 }
 
 export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
