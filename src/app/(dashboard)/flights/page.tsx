@@ -31,9 +31,10 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
     }
   }
 
-  const [flights, locationsAgg] = await Promise.all([
+  const [initial, locationsAgg] = await Promise.all([
     prisma.flight.findMany({
       where,
+      take: 50,
       orderBy: [{ createdAt: 'desc' }],
       select: {
         id: true,
@@ -44,7 +45,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
         durationSeconds: true,
         distanceMeters: true,
         altitudeMaxMeters: true,
-        rawIgc: true,
+        startAt: true,
       },
     }),
     prisma.flight.findMany({
@@ -56,16 +57,15 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   ]);
   const locations = locationsAgg.map((l) => l.location!).filter(Boolean) as string[];
 
-  const rows = flights.map((f) => ({
+  const rows = initial.map((f) => ({
     id: f.id,
-    createdAtIso: f.createdAt.toISOString(),
+    dateIso: (f.startAt ?? f.createdAt).toISOString(),
     processed: f.processed,
     filename: f.filename,
     location: f.location,
     durationSeconds: f.durationSeconds,
     distanceMeters: f.distanceMeters,
     altitudeMaxMeters: f.altitudeMaxMeters,
-    rawIgc: f.rawIgc,
   }));
 
   return (

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { backfillStartAtForUser, processUnprocessedFlightsForUser } from "@/services/flightProcessing";
-import { FlightListItem } from "./FlightListItem";
+import { FlightListItem } from "@/components/FlightListItem";
 import IGCParser from "igc-parser";
 
 type FlightsSectionProps = {

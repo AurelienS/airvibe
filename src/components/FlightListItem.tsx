@@ -31,9 +31,11 @@ export function FlightListItem({ processed, filename, location, dateIso, duratio
           </>
         )}
       </div>
-      <span className={`text-xs px-2 py-1 rounded-md ${processed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>
-        {processed ? 'Traité' : 'Non traité'}
-      </span>
+      {!processed ? (
+        <span className="text-xs px-2 py-1 rounded-md bg-orange-100 text-orange-800">
+          Non traité
+        </span>
+      ) : null}
     </li>
   );
 }

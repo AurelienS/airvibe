@@ -1,46 +1,54 @@
 'use client';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useMemo, useRef } from 'react';
-import { FlightListItem } from "../home/sections/FlightListItem";
-import IGCParser from "igc-parser";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { FlightListItem } from "@/components/FlightListItem";
 
 type FlightRow = {
   id: string;
-  createdAtIso: string;
+  dateIso: string;
   processed: boolean;
   filename: string;
   location: string | null;
   durationSeconds: number | null;
   distanceMeters: number | null;
   altitudeMaxMeters: number | null;
-  rawIgc: string | null;
 };
 
+async function fetchFlights(params: { year?: string; location?: string; cursor?: string | null; limit?: number }): Promise<{ items: Array<FlightRow>; nextCursor: string | null; total: number }> {
+  const sp = new URLSearchParams();
+  if (params.year) sp.set('year', params.year);
+  if (params.location) sp.set('location', params.location);
+  if (params.cursor) sp.set('cursor', params.cursor);
+  if (params.limit) sp.set('limit', String(params.limit));
+  const res = await fetch(`/api/flights/list?${sp.toString()}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to load flights');
+  return res.json();
+}
+
 export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
-  const rows = useMemo(() => {
-    return flights.map((f) => {
-      let startAt: Date | null = null;
-      if (f.processed && f.rawIgc) {
-        try {
-          const parsed = IGCParser.parse(f.rawIgc, { lenient: true });
-          const points = parsed.fixes ?? [];
-          if (points.length > 0) {
-            const ts = (points[0] as any).timestamp;
-            startAt = ts instanceof Date ? ts : new Date(ts);
-          }
-        } catch {
-          startAt = null;
-        }
-      }
-      const dateIso = (startAt ?? new Date(f.createdAtIso)).toISOString();
-      return { f, dateIso };
-    }).sort((a, b) => b.dateIso.localeCompare(a.dateIso));
-  }, [flights]);
+  const sp = useSearchParams();
+  const year = sp.get('year') ?? undefined;
+  const location = sp.get('location') ?? undefined;
+
+  const [items, setItems] = useState<Array<FlightRow>>(flights);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [total, setTotal] = useState<number>(flights.length);
+
+  useEffect(() => {
+    // initial load from API with limit
+    fetchFlights({ year, location, limit: 100 }).then((data) => {
+      setItems(data.items);
+      setNextCursor(data.nextCursor);
+      setTotal(data.total);
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, location]);
 
   const parentRef = useRef<HTMLDivElement | null>(null);
   const rowVirtualizer = useVirtualizer({
-    count: rows.length,
+    count: items.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 56,
     overscan: 10,
@@ -50,7 +58,8 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
     <div ref={parentRef} className="border rounded-lg" style={{ height: '70vh', overflow: 'auto' }}>
       <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
         {rowVirtualizer.getVirtualItems().map((vi) => {
-          const { f, dateIso } = rows[vi.index];
+          const f = items[vi.index];
+          const displayProcessed = Boolean(f.processed || f.location || f.durationSeconds || f.distanceMeters || f.altitudeMaxMeters);
           return (
             <div
               key={f.id}
@@ -64,10 +73,10 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
               }}
             >
               <FlightListItem
-                processed={f.processed}
+                processed={displayProcessed}
                 filename={f.filename}
                 location={f.location}
-                dateIso={dateIso}
+                dateIso={f.dateIso}
                 durationSeconds={f.durationSeconds}
                 distanceMeters={f.distanceMeters}
                 altitudeMaxMeters={f.altitudeMaxMeters}
