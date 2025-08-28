@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 import { backfillStartAtForUser, processUnprocessedFlightsForUser } from "@/services/flightProcessing";
 import { FlightListItem } from "@/components/FlightListItem";
 import IGCParser from "igc-parser";
@@ -78,7 +79,7 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
             });
             withDate.sort((a, b) => b.date.getTime() - a.date.getTime());
             return withDate.map(({ f, date }) => (
-              <a key={f.id} href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
+              <Link key={f.id} href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
                 <FlightListItem
                   processed={f.processed}
                   filename={f.filename}
@@ -88,7 +89,7 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
                   distanceMeters={f.distanceMeters}
                   altitudeMaxMeters={f.altitudeMaxMeters}
                 />
-              </a>
+              </Link>
             ));
           })()}
         </ul>

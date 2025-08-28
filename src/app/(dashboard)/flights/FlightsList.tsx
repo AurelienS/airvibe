@@ -3,6 +3,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { apiClient } from "@/lib/apiClient";
 import { FlightListItem } from "@/components/FlightListItem";
 
@@ -104,7 +105,7 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
                 transform: `translateY(${vi.start}px)`,
               }}
             >
-              <a href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
+              <Link href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
                 <FlightListItem
                   processed={displayProcessed}
                   filename={f.filename}
@@ -114,7 +115,7 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
                   distanceMeters={f.distanceMeters}
                   altitudeMaxMeters={f.altitudeMaxMeters}
                 />
-              </a>
+              </Link>
             </div>
           );
         })}

@@ -13,7 +13,9 @@ type Props = {
   altitudeMaxMeters: number | null;
 };
 
-export function FlightListItem({ processed, filename, location, dateIso, durationSeconds, distanceMeters, altitudeMaxMeters }: Props & { id?: string }) {
+import React from 'react';
+
+function FlightListItemBase({ processed, filename, location, dateIso, durationSeconds, distanceMeters, altitudeMaxMeters }: Props & { id?: string }) {
   const dateStr = new Date(dateIso).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
   return (
     <li className="py-2 flex items-center justify-between">
@@ -40,5 +42,7 @@ export function FlightListItem({ processed, filename, location, dateIso, duratio
     </li>
   );
 }
+
+export const FlightListItem = React.memo(FlightListItemBase);
 
 
