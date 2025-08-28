@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ProcessingNotice } from "@/components/ProcessingNotice";
 import { NavLinks } from "@/components/NavLinks";
+import { CurrentUserProvider } from "@/components/CurrentUserProvider";
 
 export default async function DashboardLayout({
   children,
@@ -29,7 +30,9 @@ export default async function DashboardLayout({
         </div>
       </nav>
       <ProcessingNotice />
-      <main>{children}</main>
+      <CurrentUserProvider value={{ id: null, email: session.user?.email ?? null }}>
+        <main>{children}</main>
+      </CurrentUserProvider>
     </div>
   );
 }

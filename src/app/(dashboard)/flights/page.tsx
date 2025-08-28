@@ -1,15 +1,12 @@
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
+import { auth } from "@/auth"; // kept for route gating by middleware
+import { getCurrentUserOrThrow } from "@/lib/users";
 import { FlightsFilters } from "./FlightsFilters";
 import { FlightsList } from "./FlightsList";
-import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import type { Prisma } from "@prisma/client";
 
 export default async function FlightsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const session = await auth();
-  const email = session?.user?.email ?? null;
-  const user = email ? await prisma.user.findUnique({ where: { email }, select: { id: true } }) : null;
-  if (!email || !user) return notFound();
+  const user = await getCurrentUserOrThrow();
 
   const sp = await searchParams;
   const yearParam = Array.isArray(sp?.year) ? sp.year[0] : sp?.year;
@@ -31,42 +28,17 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
     }
   }
 
-  const [initial, locationsAgg] = await Promise.all([
-    prisma.flight.findMany({
-      where,
-      take: 50,
-      orderBy: [{ createdAt: 'desc' }],
-      select: {
-        id: true,
-        createdAt: true,
-        processed: true,
-        filename: true,
-        location: true,
-        durationSeconds: true,
-        distanceMeters: true,
-        altitudeMaxMeters: true,
-        startAt: true,
-      },
-    }),
-    prisma.flight.findMany({
-      where: { userId: user.id, location: { not: null } },
-      distinct: ['location'],
-      select: { location: true },
-      orderBy: { location: 'asc' },
-    }),
-  ]);
-  const locations = locationsAgg.map((l) => l.location!).filter(Boolean) as string[];
+  const hdrs = await headers();
+  const host = hdrs.get('x-forwarded-host') ?? hdrs.get('host');
+  const proto = hdrs.get('x-forwarded-proto') ?? 'http';
+  const base = host ? `${proto}://${host}` : '';
 
-  const rows = initial.map((f) => ({
-    id: f.id,
-    dateIso: (f.startAt ?? f.createdAt).toISOString(),
-    processed: f.processed,
-    filename: f.filename,
-    location: f.location,
-    durationSeconds: f.durationSeconds,
-    distanceMeters: f.distanceMeters,
-    altitudeMaxMeters: f.altitudeMaxMeters,
-  }));
+  const [initialRes] = await Promise.all([
+    fetch(`${base}/api/flights/list?limit=50${yearParam ? `&year=${yearParam}` : ''}${locationParam ? `&location=${encodeURIComponent(locationParam)}` : ''}`, { cache: 'no-store' }),
+  ]);
+  const initialJson = await initialRes.json().catch(() => ({ items: [] }));
+  const rows = (Array.isArray(initialJson.items) ? initialJson.items : []) as any[];
+  const locations = Array.from(new Set(rows.map((r: any) => r.location).filter(Boolean))).sort() as string[];
 
   return (
     <div className="p-6">
