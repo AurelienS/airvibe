@@ -46,6 +46,19 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, location]);
 
+  // Refresh list when processing ends
+  useEffect(() => {
+    const onChanged = () => {
+      fetchFlights({ year, location, limit: 100 }).then((data) => {
+        setItems(data.items);
+        setNextCursor(data.nextCursor);
+        setTotal(data.total);
+      }).catch(() => {});
+    };
+    window.addEventListener('flights:data-changed', onChanged as EventListener);
+    return () => window.removeEventListener('flights:data-changed', onChanged as EventListener);
+  }, [year, location]);
+
   const parentRef = useRef<HTMLDivElement | null>(null);
   const rowVirtualizer = useVirtualizer({
     count: items.length,
@@ -53,6 +66,29 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
     estimateSize: () => 56,
     overscan: 10,
   });
+
+  // Infinite scroll: load next page when near end
+  useEffect(() => {
+    const el = parentRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      if (!nextCursor) return;
+      const threshold = el.scrollHeight - el.clientHeight - 400;
+      if (el.scrollTop > threshold) {
+        const c = nextCursor; // snapshot
+        setNextCursor(null); // prevent duplicate loads
+        fetchFlights({ year, location, cursor: c, limit: 100 }).then((data) => {
+          setItems((prev) => [...prev, ...data.items]);
+          setNextCursor(data.nextCursor);
+          setTotal(data.total);
+        }).catch(() => {
+          setNextCursor(c); // restore so we can retry
+        });
+      }
+    };
+    el.addEventListener('scroll', onScroll);
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [nextCursor, year, location]);
 
   return (
     <div ref={parentRef} className="border rounded-lg" style={{ height: '70vh', overflow: 'auto' }}>

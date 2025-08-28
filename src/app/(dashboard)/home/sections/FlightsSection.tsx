@@ -43,23 +43,6 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-medium">Vos vols</h2>
         <div className="flex items-center gap-2">
-          <form action={async () => {
-            'use server';
-            const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-            if (user) {
-              await processUnprocessedFlightsForUser(user.id, 50);
-              await backfillStartAtForUser(user.id, 500);
-            }
-            revalidatePath('/home');
-          }}>
-            <button
-              type="submit"
-              className="text-xs px-3 py-2 bg-green-600 text-white rounded-md disabled:opacity-60"
-              disabled={flights.length === 0}
-            >
-              Traiter les vols
-            </button>
-          </form>
           <form action={deleteAllFlights}>
             <button
               type="submit"

@@ -25,7 +25,9 @@ export default async function HomePage() {
       </div>
       <div className="mt-8 space-y-2">
         <p>Connecté en tant que: {session?.user?.email ?? "inconnu"}</p>
-        <div className="rounded-lg border p-4"><UploadFlightsForm /></div>
+        <div className="rounded-lg border p-4">
+          <UploadFlightsForm />
+        </div>
         <HomeStats stats={stats} />
         <FlightsSection email={session?.user?.email} limit={10} />
       </div>

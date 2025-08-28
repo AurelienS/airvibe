@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ProcessingNotice } from "@/components/ProcessingNotice";
 
 export default async function DashboardLayout({
   children,
@@ -21,6 +22,7 @@ export default async function DashboardLayout({
           </div>
         </div>
       </nav>
+      <ProcessingNotice />
       <main>{children}</main>
     </div>
   );

@@ -39,21 +39,15 @@ export default function UploadFlightsForm() {
         }
         throw new Error(message);
       }
-      const data: unknown = await res.json();
-      const skipped =
-        data && typeof data === 'object' && 'skippedDuplicates' in data && typeof (data as any).skippedDuplicates === 'number'
-          ? (data as { skippedDuplicates: number }).skippedDuplicates
-          : 0;
-      const added = (() => {
-        if (data && typeof data === 'object' && 'createdCount' in data && typeof (data as any).createdCount === 'number') {
-          return (data as { createdCount: number }).createdCount;
-        }
-        if (data && typeof data === 'object' && 'flights' in data && Array.isArray((data as any).flights)) {
-          return ((data as { flights: Array<unknown> }).flights).length;
-        }
-        return 0;
-      })();
-      setSummary(`${added} vol(s) ajouté(s), ${skipped} doublon(s) ignoré(s)`);
+      await res.json().catch(() => null);
+      // Notify other pages/lists to refetch so "Non traité" appears immediately
+      try { window.dispatchEvent(new Event('flights:data-changed')); } catch {}
+      // Trigger background processing immediately
+      try {
+        window.dispatchEvent(new Event('flights:processing-start'));
+        await fetch('/api/flights/process', { method: 'POST', cache: 'no-store' });
+      } catch {}
+      setSummary(null);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
