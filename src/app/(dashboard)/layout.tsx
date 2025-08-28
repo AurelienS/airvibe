@@ -18,7 +18,6 @@ export default async function DashboardLayout({
           <div className="text-sm text-gray-700 flex items-center gap-4">
             <Link href="/home">Accueil</Link>
             <Link href="/flights">Vols</Link>
-            <Link href="/stats">Stats</Link>
           </div>
         </div>
       </nav>
