@@ -16,7 +16,7 @@ export default async function HomePage() {
         <h1 className="text-2xl font-semibold">Airvibe</h1>
       </div>
       <div className="mt-8 space-y-2">
-        
+
         <div className="rounded-lg border p-4">
           <UploadFlightsForm />
         </div>

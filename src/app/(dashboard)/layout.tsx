@@ -2,6 +2,7 @@ import { auth, signOut } from "@/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ProcessingNotice } from "@/components/ProcessingNotice";
+import { NavLinks } from "@/components/NavLinks";
 
 export default async function DashboardLayout({
   children,
@@ -15,10 +16,7 @@ export default async function DashboardLayout({
       <nav className="border-b p-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/home" className="font-semibold">Airvibe</Link>
-          <div className="text-sm text-gray-700 flex items-center gap-4">
-            <Link href="/home">Accueil</Link>
-            <Link href="/flights">Vols</Link>
-          </div>
+          <NavLinks />
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-600">{session.user?.email ?? 'inconnu'}</span>
