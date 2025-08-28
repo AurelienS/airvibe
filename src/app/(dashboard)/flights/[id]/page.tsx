@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import IGCParser from "igc-parser";
+import { FlightMap } from "@/components/FlightMap";
 
 export default async function FlightDetailPage({ params }: { params: { id: string } }) {
   const session = await auth();
@@ -32,6 +33,7 @@ export default async function FlightDetailPage({ params }: { params: { id: strin
   let fixesCount = 0;
   let takeoff: { lat: number; lon: number } | null = null;
   let landing: { lat: number; lon: number } | null = null;
+  let path: Array<{ lat: number; lon: number }> = [];
   try {
     const parsed = IGCParser.parse(flight.rawIgc, { lenient: true });
     const { headers, pilot, gliderType, site, fixes } = parsed as any;
@@ -41,6 +43,7 @@ export default async function FlightDetailPage({ params }: { params: { id: strin
       const last = fixes[fixes.length - 1];
       takeoff = { lat: first.latitude, lon: first.longitude };
       landing = { lat: last.latitude, lon: last.longitude };
+      path = fixes.map((f: any) => ({ lat: f.latitude, lon: f.longitude }));
     }
     meta = {
       pilot: pilot ?? headers?.HFPLTPILOT ?? null,
@@ -81,7 +84,11 @@ export default async function FlightDetailPage({ params }: { params: { id: strin
 
           <div className="rounded-lg border p-4">
             <h2 className="text-lg font-medium mb-2">Carte</h2>
-            <div className="h-64 flex items-center justify-center text-sm text-gray-500">Carte à venir</div>
+            {path.length > 1 ? (
+              <FlightMap points={path} />
+            ) : (
+              <div className="h-64 flex items-center justify-center text-sm text-gray-500">Pas de trace disponible</div>
+            )}
           </div>
         </div>
 
