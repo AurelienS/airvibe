@@ -108,15 +108,17 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
                 transform: `translateY(${vi.start}px)`,
               }}
             >
-              <FlightListItem
-                processed={displayProcessed}
-                filename={f.filename}
-                location={f.location}
-                dateIso={f.dateIso}
-                durationSeconds={f.durationSeconds}
-                distanceMeters={f.distanceMeters}
-                altitudeMaxMeters={f.altitudeMaxMeters}
-              />
+              <a href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
+                <FlightListItem
+                  processed={displayProcessed}
+                  filename={f.filename}
+                  location={f.location}
+                  dateIso={f.dateIso}
+                  durationSeconds={f.durationSeconds}
+                  distanceMeters={f.distanceMeters}
+                  altitudeMaxMeters={f.altitudeMaxMeters}
+                />
+              </a>
             </div>
           );
         })}

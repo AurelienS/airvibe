@@ -78,16 +78,17 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
             });
             withDate.sort((a, b) => b.date.getTime() - a.date.getTime());
             return withDate.map(({ f, date }) => (
-              <FlightListItem
-                key={f.id}
-                processed={f.processed}
-                filename={f.filename}
-                location={f.location}
-                dateIso={date.toISOString()}
-                durationSeconds={f.durationSeconds}
-                distanceMeters={f.distanceMeters}
-                altitudeMaxMeters={f.altitudeMaxMeters}
-              />
+              <a key={f.id} href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
+                <FlightListItem
+                  processed={f.processed}
+                  filename={f.filename}
+                  location={f.location}
+                  dateIso={date.toISOString()}
+                  durationSeconds={f.durationSeconds}
+                  distanceMeters={f.distanceMeters}
+                  altitudeMaxMeters={f.altitudeMaxMeters}
+                />
+              </a>
             ));
           })()}
         </ul>

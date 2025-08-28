@@ -1,6 +1,7 @@
 'use client';
 
 import { formatAltitude, formatDistance, formatDuration } from "@/lib/format";
+import Link from "next/link";
 
 type Props = {
   processed: boolean;
@@ -12,7 +13,7 @@ type Props = {
   altitudeMaxMeters: number | null;
 };
 
-export function FlightListItem({ processed, filename, location, dateIso, durationSeconds, distanceMeters, altitudeMaxMeters }: Props) {
+export function FlightListItem({ processed, filename, location, dateIso, durationSeconds, distanceMeters, altitudeMaxMeters }: Props & { id?: string }) {
   const dateStr = new Date(dateIso).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
   return (
     <li className="py-2 flex items-center justify-between">
