@@ -1,18 +1,20 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+const L = typeof window !== 'undefined' ? require('leaflet') : null as any;
 
 type LatLng = { lat: number; lon: number };
+type LeafletMap = any; // keep lightweight typing for SSR guard
+type LeafletPolyline = any;
 
 export function FlightMap({ points }: { points: Array<LatLng> }) {
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const leafletRef = useRef<L.Map | null>(null);
-  const layerRef = useRef<L.Polyline | null>(null);
+  const leafletRef = useRef<LeafletMap | null>(null);
+  const layerRef = useRef<LeafletPolyline | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current || leafletRef.current) return;
+    if (!mapRef.current || leafletRef.current || !L) return;
     const map = L.map(mapRef.current, { zoomControl: true });
     leafletRef.current = map;
     // Topographic base layer (OpenTopoMap)

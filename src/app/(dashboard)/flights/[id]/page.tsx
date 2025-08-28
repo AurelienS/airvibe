@@ -4,13 +4,15 @@ import { notFound } from "next/navigation";
 import IGCParser from "igc-parser";
 import { FlightMap } from "@/components/FlightMap";
 
-export default async function FlightDetailPage({ params }: { params: { id: string } }) {
+export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const email = session?.user?.email ?? null;
   if (!email) return notFound();
 
+  const p = await params;
+
   const flight = await prisma.flight.findFirst({
-    where: { id: params.id, user: { email } },
+    where: { id: p.id, user: { email } },
     select: {
       id: true,
       filename: true,
