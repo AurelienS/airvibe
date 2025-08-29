@@ -20,6 +20,7 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
     select: {
       id: true,
       createdAt: true,
+      startAt: true,
       processed: true,
       filename: true,
       location: true,
@@ -59,16 +60,30 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
           </form>
         </div>
       </div>
-      <FlightsSectionClient initial={flights.map(f => ({
-        id: f.id,
-        dateIso: f.createdAt.toISOString(),
-        processed: f.processed,
-        filename: f.filename,
-        location: f.location,
-        durationSeconds: f.durationSeconds,
-        distanceMeters: f.distanceMeters,
-        altitudeMaxMeters: f.altitudeMaxMeters,
-      }))} email={email}
+      <FlightsSectionClient initial={flights.map(f => {
+        let date: Date = f.startAt ?? f.createdAt;
+        if (!f.startAt && f.processed && f.rawIgc) {
+          try {
+            const parsed = IGCParser.parse(f.rawIgc, { lenient: true });
+            const points = (parsed as any).fixes ?? [];
+            if (points.length > 0) {
+              const ts = points[0]?.timestamp;
+              const d = ts instanceof Date ? ts : new Date(ts);
+              if (!Number.isNaN(d.getTime())) date = d;
+            }
+          } catch {}
+        }
+        return {
+          id: f.id,
+          dateIso: date.toISOString(),
+          processed: f.processed,
+          filename: f.filename,
+          location: f.location,
+          durationSeconds: f.durationSeconds,
+          distanceMeters: f.distanceMeters,
+          altitudeMaxMeters: f.altitudeMaxMeters,
+        };
+      })} email={email}
       />
     </div>
   );
