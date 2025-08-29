@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import IGCParser from "igc-parser";
 import { FlightMap } from "@/components/FlightMap";
+import { StatList } from "@/components/StatList";
 import { Button } from "@/components/ui/Button";
 
 export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -83,14 +84,16 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-semibold">Résumé</h2>
             </div>
-            <div className="text-sm space-y-1">
-              <p><span className="text-[--color-muted-foreground]">Lieu:</span> {flight.location ?? 'Lieu inconnu'}</p>
-              <p><span className="text-[--color-muted-foreground]">Date:</span> {dateStr}</p>
-              <p><span className="text-[--color-muted-foreground]">Durée:</span> {formatDuration(flight.durationSeconds)}</p>
-              <p><span className="text-[--color-muted-foreground]">Distance:</span> {formatDistance(flight.distanceMeters)}</p>
-              <p><span className="text-[--color-muted-foreground]">Altitude max:</span> {formatAltitude(flight.altitudeMaxMeters)}</p>
-              <p><span className="text-[--color-muted-foreground]">Vitesse moyenne:</span> {derived?.avgSpeedKmh != null ? `${derived.avgSpeedKmh.toFixed(1)} km/h` : '—'}</p>
-            </div>
+            <StatList
+              items={[
+                { label: 'Lieu', value: flight.location, kind: 'string', empty: 'Lieu inconnu' },
+                { label: 'Date', value: dateStr, kind: 'string' },
+                { label: 'Durée', value: flight.durationSeconds, kind: 'duration' },
+                { label: 'Distance', value: flight.distanceMeters, kind: 'distance' },
+                { label: 'Altitude max', value: flight.altitudeMaxMeters, kind: 'altitude' },
+                { label: 'Vitesse moyenne', value: derived?.avgSpeedKmh != null ? Number(derived.avgSpeedKmh.toFixed(1)) : null, kind: 'number' },
+              ]}
+            />
           </div>
 
           <div className="card p-4 rounded-xl">
@@ -113,19 +116,21 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
           </div>
           <div className="card p-4 rounded-xl">
             <h3 className="text-sm font-semibold mb-2">Détails techniques</h3>
-            <ul className="text-sm space-y-1">
-              <li><span className="text-[--color-muted-foreground]">Points GPS:</span> {fixesCount}</li>
-              <li><span className="text-[--color-muted-foreground]">Décollage:</span> {takeoff ? `${takeoff.lat.toFixed(5)}, ${takeoff.lon.toFixed(5)}` : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Atterrissage:</span> {landing ? `${landing.lat.toFixed(5)}, ${landing.lon.toFixed(5)}` : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Début:</span> {flight.startAt ? new Date(flight.startAt).toLocaleString('fr-FR') : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Fin:</span> {flight.endAt ? new Date(flight.endAt).toLocaleString('fr-FR') : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Longueur de trace (calculée):</span> {derived?.trackLengthMeters != null ? formatDistance(derived.trackLengthMeters) : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Écart trace vs distance:</span> {derived?.trackLengthMeters != null && flight.distanceMeters != null ? formatDistance(derived.trackLengthMeters - flight.distanceMeters) : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Écart trace vs FAI:</span> {derived?.trackLengthMeters != null && flight.faiDistanceMeters != null ? formatDistance(derived.trackLengthMeters - flight.faiDistanceMeters) : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Gain alt. max:</span> {derived?.maxAltGainMeters != null ? `${derived.maxAltGainMeters} m` : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Montée max:</span> {derived?.maxClimbMs != null ? `${derived.maxClimbMs.toFixed(1)} m/s` : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Taux de chute max:</span> {derived?.maxSinkMs != null ? `${derived.maxSinkMs.toFixed(1)} m/s` : '—'}</li>
-            </ul>
+            <StatList
+              items={[
+                { label: 'Points GPS', value: fixesCount, kind: 'number' },
+                { label: 'Décollage', value: takeoff ? `${takeoff.lat.toFixed(5)}, ${takeoff.lon.toFixed(5)}` : null, kind: 'string' },
+                { label: 'Atterrissage', value: landing ? `${landing.lat.toFixed(5)}, ${landing.lon.toFixed(5)}` : null, kind: 'string' },
+                { label: 'Début', value: flight.startAt ? new Date(flight.startAt).toLocaleString('fr-FR') : null, kind: 'string' },
+                { label: 'Fin', value: flight.endAt ? new Date(flight.endAt).toLocaleString('fr-FR') : null, kind: 'string' },
+                { label: 'Longueur de trace (calculée)', value: derived?.trackLengthMeters, kind: 'distance' },
+                { label: 'Écart trace vs distance', value: derived?.trackLengthMeters != null && flight.distanceMeters != null ? (derived.trackLengthMeters - flight.distanceMeters) : null, kind: 'distance' },
+                { label: 'Écart trace vs FAI', value: derived?.trackLengthMeters != null && flight.faiDistanceMeters != null ? (derived.trackLengthMeters - flight.faiDistanceMeters) : null, kind: 'distance' },
+                { label: 'Gain alt. max', value: derived?.maxAltGainMeters, kind: 'altitude' },
+                { label: 'Montée max', value: derived?.maxClimbMs, kind: 'number' },
+                { label: 'Taux de chute max', value: derived?.maxSinkMs, kind: 'number' },
+              ]}
+            />
           </div>
           <div className="card p-4 rounded-xl">
             <h3 className="text-sm font-semibold mb-2">Métadonnées</h3>

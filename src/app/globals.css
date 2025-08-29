@@ -351,6 +351,11 @@ select {
   font-size: 0.75rem;
 }
 
+/* StatList tweaks */
+.stat-list__item { }
+.stat-list__label { opacity: 0.85; letter-spacing: 0.005em; }
+.stat-list__value { font-weight: 600; }
+
 /* Navbar */
 .navbar {
   position: sticky;
