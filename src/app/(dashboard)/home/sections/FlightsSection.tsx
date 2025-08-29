@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { broadcast } from "@/lib/sse";
 import Link from "next/link";
 import { backfillStartAtForUser, processUnprocessedFlightsForUser } from "@/services/flightProcessing";
 import { FlightListItem } from "@/components/FlightListItem";
@@ -37,6 +38,8 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
   async function deleteAllFlights() {
     'use server';
     await prisma.flight.deleteMany({ where: { user: { email } } });
+    const uid = await prisma.user.findFirst({ where: { email: email ?? undefined }, select: { id: true } });
+    if (uid?.id) broadcast({ type: 'flights:deleted_all', userId: uid.id });
     revalidatePath('/home');
   }
 

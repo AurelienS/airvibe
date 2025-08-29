@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getIgcFilesFromFormData } from "@/lib/igc/form";
 import { validateAndHash, persistFlightsForUser } from "@/services/flightImport";
+import { broadcast } from "@/lib/sse";
 
 export const runtime = "nodejs";
 
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { createdCount, skippedDuplicates } = await persistFlightsForUser(user.id, validWithHash);
-
+  broadcast({ type: 'flights:uploaded', userId: user.id, createdCount });
   return NextResponse.json({ createdCount, skippedDuplicates }, { status: 201 });
 }
 

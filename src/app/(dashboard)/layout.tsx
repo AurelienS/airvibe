@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SseProvider } from "@/components/SseProvider";
+import { prisma } from "@/lib/db";
 
 export default async function DashboardLayout({
   children,
@@ -15,6 +16,7 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
   if (!session) redirect("/login");
+  const userRec = await prisma.user.findUnique({ where: { email: session.user?.email ?? undefined }, select: { id: true } });
   return (
     <div className="min-h-svh">
       <Navbar
@@ -34,7 +36,7 @@ export default async function DashboardLayout({
       />
       <SseProvider>
         <ProcessingNotice />
-        <CurrentUserProvider value={{ id: null, email: session.user?.email ?? null }}>
+        <CurrentUserProvider value={{ id: userRec?.id ?? null, email: session.user?.email ?? null }}>
           <main className="container py-6">{children}</main>
         </CurrentUserProvider>
       </SseProvider>

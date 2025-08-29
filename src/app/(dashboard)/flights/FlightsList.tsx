@@ -4,6 +4,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useCallback } from 'react';
 import { apiClient } from "@/lib/apiClient";
 import { FlightListItem } from "@/components/FlightListItem";
 
@@ -23,6 +24,12 @@ async function fetchFlights(params: { year?: string; location?: string; cursor?:
 }
 
 export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
+  const onDelete = useCallback(async (id: string) => {
+    try {
+      await fetch(`/api/flights/${id}`, { method: 'DELETE' });
+      window.dispatchEvent(new Event('flights:data-changed'));
+    } catch {}
+  }, []);
   const sp = useSearchParams();
   const year = sp.get('year') ?? undefined;
   const location = sp.get('location') ?? undefined;
@@ -105,18 +112,20 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
                 transform: `translateY(${vi.start}px)`,
               }}
             >
-              <Link href={`/flights/${f.id}`} className="block rounded" style={{ paddingTop: 0, paddingBottom: 0 }}>
-                <FlightListItem
-                  className="relative pl-4 pr-4 row-hover"
-                  processed={displayProcessed}
-                  filename={f.filename}
-                  location={f.location}
-                  dateIso={f.dateIso}
-                  durationSeconds={f.durationSeconds}
-                  distanceMeters={f.distanceMeters}
-                  altitudeMaxMeters={f.altitudeMaxMeters}
-                />
-              </Link>
+              <div className="flex items-center justify-between pr-4">
+                <Link href={`/flights/${f.id}`} className="block flex-1 rounded" style={{ paddingTop: 0, paddingBottom: 0 }}>
+                  <FlightListItem
+                    className="relative pl-4 pr-4 row-hover"
+                    processed={displayProcessed}
+                    filename={f.filename}
+                    location={f.location}
+                    dateIso={f.dateIso}
+                    durationSeconds={f.durationSeconds}
+                    distanceMeters={f.distanceMeters}
+                    altitudeMaxMeters={f.altitudeMaxMeters}
+                  />
+                </Link>
+              </div>
             </div>
           );
         })}

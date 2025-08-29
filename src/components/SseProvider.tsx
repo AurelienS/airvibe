@@ -25,6 +25,9 @@ export function SseProvider({ children }: { children: React.ReactNode }) {
         if (data?.type === 'flights:processed') {
           window.dispatchEvent(new Event('flights:data-changed'));
         }
+        if (data?.type === 'flights:deleted' || data?.type === 'flights:deleted_all') {
+          window.dispatchEvent(new Event('flights:data-changed'));
+        }
       } catch {}
     };
     es.onerror = () => { /* keep connection open */ };
