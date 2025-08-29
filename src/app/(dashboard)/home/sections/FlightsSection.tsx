@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { backfillStartAtForUser, processUnprocessedFlightsForUser } from "@/services/flightProcessing";
 import { FlightListItem } from "@/components/FlightListItem";
+import { FlightsSectionClient } from './FlightsSectionClient';
 import IGCParser from "igc-parser";
 
 type FlightsSectionProps = {
@@ -55,46 +56,17 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
           </form>
         </div>
       </div>
-      {flights.length === 0 ? (
-        <p className="text-sm text-[--color-muted-foreground]">Aucun vol importé.</p>
-      ) : (
-        <ul>
-          {(() => {
-            const withDate = flights.map((f) => {
-              let startAt: Date | null = null;
-              if (f.processed && f.rawIgc) {
-                try {
-                  const parsed = IGCParser.parse(f.rawIgc, { lenient: true });
-                  const points = parsed.fixes ?? [];
-                  if (points.length > 0) {
-                    const ts = (points[0] as any).timestamp;
-                    startAt = ts instanceof Date ? ts : new Date(ts);
-                  }
-                } catch {
-                  startAt = null;
-                }
-              }
-              const date = startAt ?? f.createdAt;
-              return { f, date };
-            });
-            withDate.sort((a, b) => b.date.getTime() - a.date.getTime());
-            return withDate.map(({ f, date }) => (
-              <Link key={f.id} href={`/flights/${f.id}`} className="block rounded">
-                <FlightListItem
-                  className="relative pl-4 pr-4 row-hover"
-                  processed={f.processed}
-                  filename={f.filename}
-                  location={f.location}
-                  dateIso={date.toISOString()}
-                  durationSeconds={f.durationSeconds}
-                  distanceMeters={f.distanceMeters}
-                  altitudeMaxMeters={f.altitudeMaxMeters}
-                />
-              </Link>
-            ));
-          })()}
-        </ul>
-      )}
+      <FlightsSectionClient initial={flights.map(f => ({
+        id: f.id,
+        dateIso: f.createdAt.toISOString(),
+        processed: f.processed,
+        filename: f.filename,
+        location: f.location,
+        durationSeconds: f.durationSeconds,
+        distanceMeters: f.distanceMeters,
+        altitudeMaxMeters: f.altitudeMaxMeters,
+      }))} email={email}
+      />
     </div>
   );
 }

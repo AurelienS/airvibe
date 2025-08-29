@@ -6,6 +6,7 @@ import { CurrentUserProvider } from "@/components/CurrentUserProvider";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SseProvider } from "@/components/SseProvider";
 
 export default async function DashboardLayout({
   children,
@@ -31,10 +32,12 @@ export default async function DashboardLayout({
           </div>
         }
       />
-      <ProcessingNotice />
-      <CurrentUserProvider value={{ id: null, email: session.user?.email ?? null }}>
-        <main className="container py-6">{children}</main>
-      </CurrentUserProvider>
+      <SseProvider>
+        <ProcessingNotice />
+        <CurrentUserProvider value={{ id: null, email: session.user?.email ?? null }}>
+          <main className="container py-6">{children}</main>
+        </CurrentUserProvider>
+      </SseProvider>
     </div>
   );
 }

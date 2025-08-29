@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import IGCParser from "igc-parser";
 import { prisma } from "@/lib/db";
+import { broadcast } from "@/lib/sse";
 
 type ValidFlight = { name: string; content: string; contentHash: string };
 
@@ -45,6 +46,7 @@ export async function persistFlightsForUser(userId: string, validWithHash: Array
       })),
     });
     createdCount = createManyResult.count;
+    broadcast({ type: 'flights:uploaded', userId, createdCount });
   }
   const skippedDuplicates = validWithHash.length - createdCount;
   return { createdCount, skippedDuplicates };

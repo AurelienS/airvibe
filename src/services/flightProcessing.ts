@@ -1,6 +1,7 @@
 import IGCParser from "igc-parser";
 import { haversineDistanceMeters } from "@/lib/geo";
 import { prisma } from "@/lib/db";
+import { broadcast } from "@/lib/sse";
 import type { IgcFix, ParsedIgcMinimal } from "@/types/igc";
 
 export type ProcessedMetrics = {
@@ -192,6 +193,7 @@ export async function processUnprocessedFlightsForUser(userId: string, batchSize
     });
   });
   const results = await Promise.all(updates);
+  if (results.length) broadcast({ type: 'flights:processed', userId, count: results.length });
   return results.length;
 }
 
