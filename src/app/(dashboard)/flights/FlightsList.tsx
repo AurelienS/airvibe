@@ -62,6 +62,20 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
     return () => window.removeEventListener('flights:data-changed', onChanged as EventListener);
   }, [year, location]);
 
+  // After back navigation from detail deletion, if a flag is set, refresh once
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const dirty = sessionStorage.getItem('flights:dirty');
+    if (dirty) {
+      sessionStorage.removeItem('flights:dirty');
+      fetchFlights({ year, location, limit: 100 }).then((data) => {
+        setItems(data.items);
+        setNextCursor(data.nextCursor);
+        setTotal(data.total);
+      }).catch(() => {});
+    }
+  }, [year, location]);
+
   const parentRef = useRef<HTMLDivElement | null>(null);
   const rowVirtualizer = useVirtualizer({
     count: items.length,

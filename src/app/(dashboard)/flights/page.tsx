@@ -7,6 +7,7 @@ import { SkeletonList } from '@/components/SkeletonList';
 const FlightsListServer = dynamic(() => import('./FlightsListServer'));
 import { headers } from "next/headers";
 import type { Prisma } from "@prisma/client";
+import { Suspense as ReactSuspense } from 'react';
 
 export default async function FlightsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await getCurrentUserOrThrow();

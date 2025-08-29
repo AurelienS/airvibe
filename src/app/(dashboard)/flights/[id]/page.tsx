@@ -5,7 +5,7 @@ import IGCParser from "igc-parser";
 import { FlightMap } from "@/components/FlightMap";
 import { StatList } from "@/components/StatList";
 import { BackButton } from "@/components/BackButton";
-import { redirect } from "next/navigation";
+import { DeleteFlightButton } from "@/components/DeleteFlightButton";
 import { Button } from "@/components/ui/Button";
 
 export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -117,13 +117,7 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
               <h3 className="text-sm font-semibold">Fichier</h3>
               <div className="flex items-center gap-2">
                 <a href={`/api/flights/${flight.id}/download`} className="btn btn--ghost text-xs">Télécharger</a>
-                <form action={async () => {
-                  'use server';
-                  await prisma.flight.delete({ where: { id: flight.id } });
-                  redirect('/flights');
-                }}>
-                  <button type="submit" className="btn text-xs" style={{ background: 'var(--destructive)', color: 'var(--destructive-foreground)' }}>Supprimer</button>
-                </form>
+                <DeleteFlightButton flightId={flight.id} />
               </div>
             </div>
             <p className="text-sm break-words">{flight.filename}</p>
