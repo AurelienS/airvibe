@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import IGCParser from "igc-parser";
 import { FlightMap } from "@/components/FlightMap";
 import { StatList } from "@/components/StatList";
+import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/ui/Button";
 
 export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -78,6 +79,9 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <BackButton />
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <div className="card p-4 rounded-xl">
