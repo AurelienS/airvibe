@@ -3,11 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-function cls(isActive: boolean): string {
-  const base = 'text-sm px-2 py-1 rounded-md';
-  return isActive
-    ? `${base} bg-gray-200 text-gray-900`
-    : `${base} text-gray-700 hover:text-gray-900`;
+function pillClass(isActive: boolean): string {
+  const base = 'pill text-sm';
+  return isActive ? `${base} pill--active` : base;
 }
 
 export function NavLinks() {
@@ -16,8 +14,8 @@ export function NavLinks() {
   const flightsActive = pathname === '/flights' || pathname.startsWith('/flights/');
   return (
     <div className="flex items-center gap-2">
-      <Link href="/home" className={cls(homeActive)}>Accueil</Link>
-      <Link href="/flights" className={cls(flightsActive)}>Vols</Link>
+      <Link href="/home" className={pillClass(homeActive)}>Accueil</Link>
+      <Link href="/flights" className={pillClass(flightsActive)}>Vols</Link>
     </div>
   );
 }

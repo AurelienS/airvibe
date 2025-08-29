@@ -9,11 +9,11 @@ export function HomeStats({ stats }: { stats: { allTime: FlightStats; currentYea
     return h > 0 ? `${h} h ${m.toString().padStart(2, '0')} min` : `${m} min`;
   };
   return (
-    <div className="rounded-lg border p-4">
-      <h2 className="text-lg font-medium mb-3">Stats</h2>
+    <div className="card p-4 rounded-xl">
+      <h2 className="text-lg font-semibold mb-3">Stats</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <h3 className="text-sm font-semibold mb-2">Cette année</h3>
+          <h3 className="chip mb-2">Cette année</h3>
           <ul className="text-sm space-y-1">
             <li>Total vols: {currentYear.totalFlights}</li>
             <li>Temps de vol: {fmtTime(currentYear.totalFlightTimeSeconds)}</li>
@@ -23,7 +23,7 @@ export function HomeStats({ stats }: { stats: { allTime: FlightStats; currentYea
           </ul>
         </div>
         <div>
-          <h3 className="text-sm font-semibold mb-2">Depuis le début</h3>
+          <h3 className="chip mb-2">Depuis le début</h3>
           <ul className="text-sm space-y-1">
             <li>Total vols: {allTime.totalFlights}</li>
             <li>Temps de vol: {fmtTime(allTime.totalFlightTimeSeconds)}</li>

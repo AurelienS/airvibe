@@ -88,8 +88,8 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
   }, [nextCursor, year, location]);
 
   return (
-    <div ref={parentRef} className="border rounded-lg" style={{ height: '70vh', overflow: 'auto' }}>
-      <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
+    <div ref={parentRef} className="card rounded-xl" style={{ height: '70vh', overflow: 'auto' ,padding: '0.5rem 0'}}>
+      <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative',}}>
         {rowVirtualizer.getVirtualItems().map((vi) => {
           const f = items[vi.index];
           const displayProcessed = Boolean(f.processed || f.location || f.durationSeconds || f.distanceMeters || f.altitudeMaxMeters);
@@ -105,8 +105,9 @@ export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
                 transform: `translateY(${vi.start}px)`,
               }}
             >
-              <Link href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
+              <Link href={`/flights/${f.id}`} className="block rounded" style={{ paddingTop: 0, paddingBottom: 0 }}>
                 <FlightListItem
+                  className="relative pl-4 pr-4 row-hover"
                   processed={displayProcessed}
                   filename={f.filename}
                   location={f.location}

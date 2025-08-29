@@ -41,14 +41,14 @@ export function FlightMap({ points }: { points: Array<LatLng> }) {
     if (!points || points.length === 0) return;
 
     const latlngs = points.map(p => L.latLng(p.lat, p.lon));
-    const poly = L.polyline(latlngs, { color: '#2563eb', weight: 3 });
+    const poly = L.polyline(latlngs, { color: '#5b6cff', weight: 3 });
     layerRef.current = poly;
     poly.addTo(map);
     map.fitBounds(poly.getBounds(), { padding: [20, 20] });
   }, [points]);
 
   return (
-    <div ref={mapRef} className="w-full h-64 rounded-md overflow-hidden border" />
+    <div ref={mapRef} className="w-full h-[60vh] rounded-xl overflow-hidden border" />
   );
 }
 

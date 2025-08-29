@@ -10,9 +10,8 @@ export default async function HomePage() {
   const stats = await getUserFlightStats(user.id);
   return (
     <div className="p-6">
-      <div className="space-y-2">
-
-        <div className="rounded-lg border p-4">
+      <div className="space-y-4">
+        <div className="card p-4 rounded-xl">
           <UploadFlightsForm />
         </div>
         <HomeStats stats={stats} />

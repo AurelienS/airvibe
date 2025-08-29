@@ -61,7 +61,8 @@ export function ProcessingNotice() {
   if (!visible) return null;
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
-      <div className="pointer-events-auto mt-2 rounded-md bg-blue-50 text-blue-800 text-xs px-4 py-2 shadow border border-blue-100">
+      <div className="pointer-events-auto mt-2 text-xs px-4 py-2 rounded-xl glass shadow-card">
+        <span className="chip" style={{ marginRight: 8 }}>Batch</span>
         Traitement en cours… {unprocessed} en attente
       </div>
     </div>

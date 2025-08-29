@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import IGCParser from "igc-parser";
 import { FlightMap } from "@/components/FlightMap";
+import { Button } from "@/components/ui/Button";
 
 export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -61,61 +62,57 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-end">
-        <a
-          href={`/api/flights/${flight.id}/download`}
-          className="text-sm px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
-        >
-          Télécharger IGC
-        </a>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <div className="rounded-lg border p-4">
-            <h2 className="text-lg font-medium mb-2">Résumé</h2>
-            <div className="text-sm text-gray-800 space-y-1">
-              <p><span className="text-gray-500">Lieu:</span> {flight.location ?? 'Lieu inconnu'}</p>
-              <p><span className="text-gray-500">Date:</span> {dateStr}</p>
-              <p><span className="text-gray-500">Durée:</span> {formatDuration(flight.durationSeconds)}</p>
-              <p><span className="text-gray-500">Distance:</span> {formatDistance(flight.distanceMeters)}</p>
-              <p><span className="text-gray-500">Altitude max:</span> {formatAltitude(flight.altitudeMaxMeters)}</p>
+          <div className="card p-4 rounded-xl">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold">Résumé</h2>
+            </div>
+            <div className="text-sm space-y-1">
+              <p><span className="text-[--color-muted-foreground]">Lieu:</span> {flight.location ?? 'Lieu inconnu'}</p>
+              <p><span className="text-[--color-muted-foreground]">Date:</span> {dateStr}</p>
+              <p><span className="text-[--color-muted-foreground]">Durée:</span> {formatDuration(flight.durationSeconds)}</p>
+              <p><span className="text-[--color-muted-foreground]">Distance:</span> {formatDistance(flight.distanceMeters)}</p>
+              <p><span className="text-[--color-muted-foreground]">Altitude max:</span> {formatAltitude(flight.altitudeMaxMeters)}</p>
             </div>
           </div>
 
-          <div className="rounded-lg border p-4">
-            <h2 className="text-lg font-medium mb-2">Carte</h2>
+          <div className="card p-4 rounded-xl">
+            <h2 className="text-lg font-semibold mb-2">Carte</h2>
             {path.length > 1 ? (
               <FlightMap points={path} />
             ) : (
-              <div className="h-64 flex items-center justify-center text-sm text-gray-500">Pas de trace disponible</div>
+              <div className="h-64 flex items-center justify-center text-sm text-[--color-muted-foreground]">Pas de trace disponible</div>
             )}
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-lg border p-4">
-            <h3 className="text-sm font-semibold mb-2">Fichier</h3>
+          <div className="card p-4 rounded-xl">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold">Fichier</h3>
+              <a href={`/api/flights/${flight.id}/download`} className="btn btn--ghost text-xs">Télécharger</a>
+            </div>
             <p className="text-sm break-words">{flight.filename}</p>
           </div>
-          <div className="rounded-lg border p-4">
+          <div className="card p-4 rounded-xl">
             <h3 className="text-sm font-semibold mb-2">Détails techniques</h3>
-            <ul className="text-sm text-gray-800 space-y-1">
-              <li><span className="text-gray-500">Points GPS:</span> {fixesCount}</li>
-              <li><span className="text-gray-500">Décollage:</span> {takeoff ? `${takeoff.lat.toFixed(5)}, ${takeoff.lon.toFixed(5)}` : '—'}</li>
-              <li><span className="text-gray-500">Atterrissage:</span> {landing ? `${landing.lat.toFixed(5)}, ${landing.lon.toFixed(5)}` : '—'}</li>
-              <li><span className="text-gray-500">Début:</span> {flight.startAt ? new Date(flight.startAt).toLocaleString('fr-FR') : '—'}</li>
-              <li><span className="text-gray-500">Fin:</span> {flight.endAt ? new Date(flight.endAt).toLocaleString('fr-FR') : '—'}</li>
+            <ul className="text-sm space-y-1">
+              <li><span className="text-[--color-muted-foreground]">Points GPS:</span> {fixesCount}</li>
+              <li><span className="text-[--color-muted-foreground]">Décollage:</span> {takeoff ? `${takeoff.lat.toFixed(5)}, ${takeoff.lon.toFixed(5)}` : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Atterrissage:</span> {landing ? `${landing.lat.toFixed(5)}, ${landing.lon.toFixed(5)}` : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Début:</span> {flight.startAt ? new Date(flight.startAt).toLocaleString('fr-FR') : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Fin:</span> {flight.endAt ? new Date(flight.endAt).toLocaleString('fr-FR') : '—'}</li>
             </ul>
           </div>
-          <div className="rounded-lg border p-4">
+          <div className="card p-4 rounded-xl">
             <h3 className="text-sm font-semibold mb-2">Métadonnées</h3>
-            <ul className="text-sm text-gray-800 space-y-1">
-              <li><span className="text-gray-500">Pilote:</span> {toText(meta.pilot)}</li>
-              <li><span className="text-gray-500">Aile:</span> {toText(meta.glider)}</li>
-              <li><span className="text-gray-500">Fabricant:</span> {toText(meta.manufacturer)}</li>
-              <li><span className="text-gray-500">Compétition ID:</span> {toText(meta.competitionId)}</li>
-              <li><span className="text-gray-500">Site (IGC):</span> {toText((meta as any).site)}</li>
+            <ul className="text-sm space-y-1">
+              <li><span className="text-[--color-muted-foreground]">Pilote:</span> {toText(meta.pilot)}</li>
+              <li><span className="text-[--color-muted-foreground]">Aile:</span> {toText(meta.glider)}</li>
+              <li><span className="text-[--color-muted-foreground]">Fabricant:</span> {toText(meta.manufacturer)}</li>
+              <li><span className="text-[--color-muted-foreground]">Compétition ID:</span> {toText(meta.competitionId)}</li>
+              <li><span className="text-[--color-muted-foreground]">Site (IGC):</span> {toText((meta as any).site)}</li>
             </ul>
           </div>
         </div>

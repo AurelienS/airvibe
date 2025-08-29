@@ -1,26 +1,431 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Airvibe Theme — elegant, slick, and distinctive
+  - Design tokens via CSS variables
+  - Mapped to Tailwind v4 @theme for utility usage
+  - Minimal, refined base and component styles (pure CSS)
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Tokens */
+:root {
+  color-scheme: light;
+  /* Brand and accent */
+  --brand-hue: 252;
+  --brand-saturation: 92%;
+  --brand-lightness: 58%;
+  --primary: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
+  --primary-foreground: hsl(0 0% 100%);
+  --accent: hsl(192 92% 46%);
+  --accent-foreground: hsl(0 0% 100%);
+  --highlight: hsl(152 70% 46%);
+
+  /* Base surface */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222 24% 9%);
+  --muted: hsl(220 15% 96%);
+  --muted-foreground: hsl(222 12% 32%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222 24% 9%);
+  --border: hsl(220 14% 90%);
+  --input: hsl(220 14% 90%);
+  --ring: hsl(var(--brand-hue) 90% 55%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  /* Radii */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
+
+  /* Layout */
+  --container-max: 1120px;
+
+  /* Relief highlights */
+  --elevate-highlight: rgba(255, 255, 255, 0.85);
+  --elevate-shadow: rgba(0, 0, 0, 0.08);
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, hsl(252 94% 62%), hsl(198 92% 54%), hsl(152 70% 48%));
+  --gradient-surface: linear-gradient(180deg, color-mix(in oklab, var(--card) 96%, var(--foreground) 4%), color-mix(in oklab, var(--card) 90%, transparent));
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    --background: hsl(224 28% 7%);
+    --foreground: hsl(210 20% 96%);
+    --muted: hsl(224 22% 10%);
+    --muted-foreground: hsl(215 18% 78%);
+    --card: hsl(224 24% 9%);
+    --card-foreground: hsl(210 20% 96%);
+    --border: hsl(224 18% 16%);
+    --input: hsl(224 18% 16%);
+    --ring: hsl(var(--brand-hue) 98% 66%);
+    --accent: hsl(196 92% 52%);
+    --accent-foreground: hsl(210 20% 98%);
+    --destructive: hsl(0 84% 62%);
+    --destructive-foreground: hsl(210 20% 98%);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+    --shadow-md: 0 6px 16px rgba(0,0,0,0.45);
+    --shadow-lg: 0 18px 42px rgba(0,0,0,0.55);
+    --elevate-highlight: rgba(255, 255, 255, 0.08);
+    --elevate-shadow: rgba(0, 0, 0, 0.55);
+
+    --gradient-brand: linear-gradient(135deg, hsl(255 94% 64%), hsl(198 90% 56%), hsl(152 70% 50%));
+    --gradient-surface: linear-gradient(180deg, color-mix(in oklab, var(--card) 94%, var(--foreground) 6%), color-mix(in oklab, var(--card) 88%, transparent));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Tailwind theme mappings */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
+
+/* Base styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  /* Artsy layered background with subtle relief */
+  background:
+    radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--primary) 14%, transparent), transparent 60%),
+    radial-gradient(1000px 520px at 110% -20%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 55%),
+    linear-gradient(180deg, color-mix(in oklab, var(--background) 96%, transparent), var(--background));
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.6;
+}
+
+/* Subtle grain overlay for depth */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1px 1px at 25% 15%, rgba(255,255,255,0.06), transparent 50%),
+    radial-gradient(1px 1px at 60% 45%, rgba(0,0,0,0.06), transparent 50%),
+    radial-gradient(1px 1px at 80% 20%, rgba(0,0,0,0.05), transparent 50%);
+  opacity: 0.18;
+  mix-blend-mode: soft-light;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Typography rhythm */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+/* Cards and containers */
+.container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.card {
+  background: var(--gradient-surface);
+  color: var(--card-foreground);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255,255,255,0.08),
+    0 10px 30px var(--elevate-shadow);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-weight: 600;
+  transition: transform 80ms ease, background 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--primary {
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--primary) 92%, white 8%),
+      color-mix(in oklab, var(--primary) 88%, black 12%)
+    );
+  color: var(--primary-foreground);
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    0 6px 18px color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+.btn--primary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 10px 26px color-mix(in oklab, var(--primary) 28%, transparent);
+}
+
+/* Button shine */
+.btn--primary::after {
+  content: "";
+  position: absolute;
+  top: -150%;
+  left: -30%;
+  width: 60%;
+  height: 300%;
+  transform: rotate(25deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  transition: transform 300ms ease;
+}
+
+.btn--primary:hover::after {
+  transform: translateX(300%) rotate(25deg);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--border) 70%, var(--foreground) 30%);
+}
+
+.btn--ghost:hover {
+  background: color-mix(in oklab, var(--foreground) 3%, transparent);
+}
+
+/* Inputs */
+.input, input, textarea, select {
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--background) 98%, var(--foreground) 2%),
+    color-mix(in oklab, var(--background) 94%, transparent)
+  );
+  color: var(--foreground);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.input::placeholder, input::placeholder, textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* Navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--background) 92%, var(--foreground) 2%),
+      color-mix(in oklab, var(--background) 86%, transparent)
+    );
+  backdrop-filter: saturate(140%) blur(8px);
+}
+
+/* Subtle animated topographic lines layered under airflow */
+.airflow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--foreground) 6%, transparent) 0 2px,
+      transparent 2px 24px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in oklab, var(--foreground) 4%, transparent) 0 1px,
+      transparent 1px 18px
+    );
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  animation: drift 28s linear infinite;
+}
+
+@keyframes drift {
+  0% { transform: translate3d(0,0,0) scale(1); }
+  50% { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+  100% { transform: translate3d(0,0,0) scale(1); }
+}
+
+/* Gently animate airflow glow */
+.airflow::after { animation: drift 26s ease-in-out infinite; }
+
+.navbar__brand {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.navbar__section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Nav pills */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--background) 94%, var(--foreground) 6%),
+    color-mix(in oklab, var(--background) 88%, transparent)
+  );
+  color: var(--foreground);
+  transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.pill--active {
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  box-shadow: 0 6px 16px color-mix(in oklab, var(--primary) 24%, transparent);
+  color: color-mix(in oklab, var(--foreground) 86%, var(--primary) 14%);
+}
+
+.pill:hover { background: color-mix(in oklab, var(--foreground) 4%, transparent); }
+
+.pill--active::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 30%, transparent);
+}
+
+/* Airflow motif */
+.airflow {
+  position: relative;
+  overflow: hidden;
+}
+
+.airflow::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    radial-gradient(50% 50% at 70% 30%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 60%),
+    radial-gradient(40% 40% at 30% 70%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 60%),
+    conic-gradient(from 210deg at 50% 50%, transparent 0 20%, color-mix(in oklab, var(--primary) 8%, transparent) 20% 33%, transparent 33% 55%, color-mix(in oklab, var(--accent) 8%, transparent) 55% 70%, transparent 70% 100%);
+  filter: blur(32px) saturate(120%);
+  opacity: 0.55;
+  mask-image: radial-gradient(70% 70% at 50% 50%, black 40%, transparent 70%);
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--muted) 92%, transparent);
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* Row hover */
+.row-hover:hover {
+  background: color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+
+/* Glass */
+.glass {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--background) 70%, transparent), color-mix(in oklab, var(--background) 84%, transparent));
+  border: 1px solid color-mix(in oklab, var(--border) 65%, var(--foreground) 35%);
+  backdrop-filter: blur(10px) saturate(140%);
+}
+
+/* Utility accents */
+.shadow-card {
+  box-shadow: var(--shadow-md);
+}
+
+.rounded-xl {
+  border-radius: var(--radius-lg);
+}
+

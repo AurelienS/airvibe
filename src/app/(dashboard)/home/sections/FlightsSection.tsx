@@ -40,14 +40,14 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
   }
 
   return (
-    <div className="rounded-lg border p-4">
+    <div className="card p-4 rounded-xl">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-medium">Vos vols</h2>
+        <h2 className="text-lg font-semibold">Vos vols</h2>
         <div className="flex items-center gap-2">
           <form action={deleteAllFlights}>
             <button
               type="submit"
-              className="text-xs px-3 py-2 bg-red-600 text-white rounded-md disabled:opacity-60"
+              className="text-xs px-3 py-2 rounded-md btn btn--primary disabled:opacity-60"
               disabled={flights.length === 0}
             >
               Supprimer tous les vols
@@ -56,9 +56,9 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
         </div>
       </div>
       {flights.length === 0 ? (
-        <p className="text-sm text-gray-500">Aucun vol importé.</p>
+        <p className="text-sm text-[--color-muted-foreground]">Aucun vol importé.</p>
       ) : (
-        <ul className="divide-y">
+        <ul>
           {(() => {
             const withDate = flights.map((f) => {
               let startAt: Date | null = null;
@@ -79,8 +79,9 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
             });
             withDate.sort((a, b) => b.date.getTime() - a.date.getTime());
             return withDate.map(({ f, date }) => (
-              <Link key={f.id} href={`/flights/${f.id}`} className="block hover:bg-gray-50 rounded">
+              <Link key={f.id} href={`/flights/${f.id}`} className="block rounded">
                 <FlightListItem
+                  className="relative pl-4 pr-4 row-hover"
                   processed={f.processed}
                   filename={f.filename}
                   location={f.location}
