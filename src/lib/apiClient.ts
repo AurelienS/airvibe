@@ -1,22 +1,9 @@
 import type { ListFlightsResponse } from "@/types/api";
 
-function buildBaseUrl(): string {
-  if (typeof window !== 'undefined') return '';
-  try {
-    const mod = require('next/headers');
-    const headers: any = mod.headers;
-    const hdrs = headers();
-    const host = hdrs.get('x-forwarded-host') ?? hdrs.get('host');
-    const proto = hdrs.get('x-forwarded-proto') ?? 'http';
-    if (host) return `${proto}://${host}`;
-  } catch {}
-  return '';
-}
-
 export class ApiClient {
   private base: string;
-  constructor() {
-    this.base = buildBaseUrl();
+  constructor(base = '') {
+    this.base = base;
   }
 
   async listFlights(params: { year?: string; location?: string; cursor?: string | null; limit?: number }): Promise<ListFlightsResponse> {
@@ -43,6 +30,7 @@ export class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient();
+export const apiClient = new ApiClient('');
+export function createApiClient(base = '') { return new ApiClient(base); }
 
 
