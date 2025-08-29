@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-[--color-background] text-[--color-foreground]">
+    <html lang="en" suppressHydrationWarning className="bg-[--color-background] text-[--color-foreground]" data-theme="light">
       <head>
         <script
           dangerouslySetInnerHTML={{ __html: `
