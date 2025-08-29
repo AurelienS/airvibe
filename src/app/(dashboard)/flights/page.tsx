@@ -1,7 +1,10 @@
 import { auth } from "@/auth"; // kept for route gating by middleware
 import { getCurrentUserOrThrow } from "@/lib/users";
 import { FlightsFilters } from "./FlightsFilters";
-import { FlightsList } from "./FlightsList";
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import { SkeletonList } from '@/components/SkeletonList';
+const FlightsListServer = dynamic(() => import('./FlightsListServer'));
 import { headers } from "next/headers";
 import type { Prisma } from "@prisma/client";
 
@@ -33,18 +36,19 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   const proto = hdrs.get('x-forwarded-proto') ?? 'http';
   const base = host ? `${proto}://${host}` : '';
 
-  const [initialRes] = await Promise.all([
-    fetch(`${base}/api/flights/list?limit=50${yearParam ? `&year=${yearParam}` : ''}${locationParam ? `&location=${encodeURIComponent(locationParam)}` : ''}`, { cache: 'no-store' }),
-  ]);
+  // Preload minimal data: just enough to render filters quickly
+  const initialRes = await fetch(`${base}/api/flights/list?limit=1${yearParam ? `&year=${yearParam}` : ''}${locationParam ? `&location=${encodeURIComponent(locationParam)}` : ''}`, { cache: 'no-store' });
   const initialJson = await initialRes.json().catch(() => ({ items: [] }));
-  const rows = (Array.isArray(initialJson.items) ? initialJson.items : []) as any[];
-  const locations = Array.from(new Set(rows.map((r: any) => r.location).filter(Boolean))).sort() as string[];
+  const rowsSample = (Array.isArray(initialJson.items) ? initialJson.items : []) as any[];
+  const locations = Array.from(new Set(rowsSample.map((r: any) => r.location).filter(Boolean))).sort() as string[];
 
   return (
     <div className="p-6">
       <div className="space-y-4">
         <FlightsFilters locations={locations} />
-        <FlightsList flights={rows} />
+        <Suspense fallback={<SkeletonList rows={10} />}>
+          <FlightsListServer year={yearParam} location={locationParam} />
+        </Suspense>
       </div>
     </div>
   );

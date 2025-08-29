@@ -7,14 +7,15 @@ import { getCurrentUserOrThrow } from "@/lib/users";
 
 export default async function HomePage() {
   const user = await getCurrentUserOrThrow();
-  const stats = await getUserFlightStats(user.id);
+  const statsPromise = getUserFlightStats(user.id);
   return (
     <div className="p-6">
       <div className="space-y-4">
         <div className="card p-4 rounded-xl">
           <UploadFlightsForm />
         </div>
-        <HomeStats stats={stats} />
+        {/* Render quickly, stats load asynchronously */}
+        <HomeStats stats={await statsPromise} />
         <FlightsSection email={user.email} limit={10} />
       </div>
     </div>
