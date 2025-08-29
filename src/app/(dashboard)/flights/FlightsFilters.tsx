@@ -72,6 +72,7 @@ export function FlightsFilters({ locations }: { locations: Array<string> }) {
               pushParams(next, location);
             }}
             className="text-sm input"
+            aria-label="Filtrer par année"
           >
             {years.map((y) => (
               <option key={y || 'all'} value={y}>{y ? y : 'Toutes'}</option>
