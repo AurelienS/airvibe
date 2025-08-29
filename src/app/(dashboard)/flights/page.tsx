@@ -1,10 +1,7 @@
 import { auth } from "@/auth"; // kept for route gating by middleware
 import { getCurrentUserOrThrow } from "@/lib/users";
-import { FlightsFilters } from "./FlightsFilters";
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
-import { SkeletonList } from '@/components/SkeletonList';
-const FlightsListServer = dynamic(() => import('./FlightsListServer'));
+import FlightsFiltersServer from './FlightsFiltersServer';
+import { FlightsListSection } from './FlightsListSection';
 import { listFlightsForUser } from '@/services/flights';
 import { createApiClient } from '@/lib/apiClient';
 import type { Prisma } from "@prisma/client";
@@ -38,10 +35,9 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="p-6">
       <div className="space-y-4">
-        <FlightsFilters locations={[]} />
-        <Suspense fallback={<SkeletonList rows={10} />}>
-          <FlightsListServer year={yearParam} location={locationParam} />
-        </Suspense>
+        {/* Server component fetches locations */}
+        <FlightsFiltersServer year={yearParam} />
+        <FlightsListSection year={yearParam} location={locationParam} />
       </div>
     </div>
   );

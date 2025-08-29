@@ -48,4 +48,22 @@ export async function listFlightsForUser(userId: string, args: { year?: string; 
   return { items: rows, total, nextCursor };
 }
 
+export async function listLocationsForUser(userId: string, args: { year?: string; limit?: number }) {
+  const { year } = args;
+  const where: any = { userId };
+  if (year) {
+    const y = Number(year);
+    if (!Number.isNaN(y)) {
+      const start = new Date(Date.UTC(y, 0, 1));
+      const end = new Date(Date.UTC(y + 1, 0, 1));
+      where.OR = [
+        { startAt: { gte: start, lt: end } },
+        { AND: [{ startAt: null }, { createdAt: { gte: start, lt: end } }] },
+      ];
+    }
+  }
+  const rows = await prisma.flight.findMany({ where, select: { location: true } });
+  return Array.from(new Set(rows.map(r => r.location).filter(Boolean) as string[])).sort();
+}
+
 
