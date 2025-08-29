@@ -21,15 +21,21 @@ export type ProcessedMetrics = {
 
 export function preferAltitude(fix: IgcFix | undefined): number | null {
   if (!fix) return null;
+  // Some IGC parsers fill `altitude`
+  const a1 = typeof fix.altitude === 'number' ? fix.altitude : null;
   const pa = typeof fix.pressureAltitude === 'number' ? fix.pressureAltitude : null;
   const ga = typeof fix.gpsAltitude === 'number' ? fix.gpsAltitude : null;
-  const a = pa ?? ga;
+  const a = a1 ?? pa ?? ga;
   return typeof a === 'number' && !Number.isNaN(a) ? a : null;
 }
 
 export function timestampSeconds(ts: IgcFix["timestamp"]): number | null {
   if (ts instanceof Date) return ts.getTime() / 1000;
-  if (typeof ts === 'number') return ts;
+  if (typeof ts === 'number') {
+    // Heuristic: if looks like milliseconds since epoch, convert to seconds
+    // 1e10 ~ Sat Nov 20 2286 in seconds; current ms timestamps are > 1e12
+    return ts > 1e10 ? ts / 1000 : ts;
+  }
   const d = new Date(ts as string);
   const n = d.getTime();
   return Number.isFinite(n) ? n / 1000 : null;
@@ -85,15 +91,15 @@ export function computeMaxAltitudeGain(alts: number[]): number | null {
 export function computeVerticalExtremes(times: number[], alts: number[]): { maxClimbMs: number | null; maxSinkMs: number | null } {
   let maxClimb: number | null = null;
   let maxSink: number | null = null;
-  const windowSeconds = 3;
-  const minDt = 1.5;
+  const windowSeconds = 10; // longer window to capture stronger thermals
+  const minDt = 0.8;
   let startIdx = 0;
   for (let i = 0; i < times.length; i++) {
     while (startIdx < i && (times[i] - times[startIdx]) > windowSeconds) startIdx++;
     const dt = times[i] - times[startIdx];
     if (dt >= minDt) {
       const vs = (alts[i] - alts[startIdx]) / dt; // m/s
-      if (vs < 15 && vs > -15) {
+      if (Number.isFinite(vs) && Math.abs(vs) < 15) {
         if (maxClimb == null || vs > maxClimb) maxClimb = vs;
         if (maxSink == null || vs < maxSink) maxSink = vs;
       }
@@ -103,9 +109,9 @@ export function computeVerticalExtremes(times: number[], alts: number[]): { maxC
   if (maxClimb == null || maxSink == null) {
     for (let i = 1; i < times.length; i++) {
       const dt = times[i] - times[i - 1];
-      if (dt > 0.8) {
+      if (dt > 0.3) {
         const vs = (alts[i] - alts[i - 1]) / dt;
-        if (vs < 15 && vs > -15) {
+        if (Number.isFinite(vs) && Math.abs(vs) < 15) {
           if (maxClimb == null || vs > maxClimb) maxClimb = vs;
           if (maxSink == null || vs < maxSink) maxSink = vs;
         }
@@ -113,8 +119,8 @@ export function computeVerticalExtremes(times: number[], alts: number[]): { maxC
     }
   }
   return {
-    maxClimbMs: maxClimb != null ? Number(maxClimb.toFixed(2)) : null,
-    maxSinkMs: maxSink != null ? Number(maxSink.toFixed(2)) : null,
+    maxClimbMs: maxClimb != null ? Number(maxClimb.toFixed(1)) : null,
+    maxSinkMs: maxSink != null ? Number(maxSink.toFixed(1)) : null,
   };
 }
 

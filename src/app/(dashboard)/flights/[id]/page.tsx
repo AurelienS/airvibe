@@ -123,8 +123,8 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
               <li><span className="text-[--color-muted-foreground]">Écart trace vs distance:</span> {derived?.trackLengthMeters != null && flight.distanceMeters != null ? formatDistance(derived.trackLengthMeters - flight.distanceMeters) : '—'}</li>
               <li><span className="text-[--color-muted-foreground]">Écart trace vs FAI:</span> {derived?.trackLengthMeters != null && flight.faiDistanceMeters != null ? formatDistance(derived.trackLengthMeters - flight.faiDistanceMeters) : '—'}</li>
               <li><span className="text-[--color-muted-foreground]">Gain alt. max:</span> {derived?.maxAltGainMeters != null ? `${derived.maxAltGainMeters} m` : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Montée max:</span> {derived?.maxClimbMs != null ? `${derived.maxClimbMs.toFixed(2)} m/s` : '—'}</li>
-              <li><span className="text-[--color-muted-foreground]">Taux de chute max:</span> {derived?.maxSinkMs != null ? `${derived.maxSinkMs.toFixed(2)} m/s` : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Montée max:</span> {derived?.maxClimbMs != null ? `${derived.maxClimbMs.toFixed(1)} m/s` : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Taux de chute max:</span> {derived?.maxSinkMs != null ? `${derived.maxSinkMs.toFixed(1)} m/s` : '—'}</li>
             </ul>
           </div>
           <div className="card p-4 rounded-xl">

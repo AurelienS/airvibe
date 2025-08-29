@@ -7,6 +7,7 @@ export type IgcFix = {
   latitude: number;
   longitude: number;
   timestamp: Date | number | string;
+  altitude?: number | null;
   gpsAltitude?: number | null;
   pressureAltitude?: number | null;
 };
