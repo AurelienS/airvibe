@@ -83,6 +83,52 @@
   }
 }
 
+/* Explicit theme overrides via data-theme attribute */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222 24% 9%);
+  --muted: hsl(220 15% 96%);
+  --muted-foreground: hsl(222 12% 32%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222 24% 9%);
+  --border: hsl(220 14% 90%);
+  --input: hsl(220 14% 90%);
+  --ring: hsl(var(--brand-hue) 90% 55%);
+  --accent: hsl(192 92% 46%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --elevate-highlight: rgba(255, 255, 255, 0.85);
+  --elevate-shadow: rgba(0, 0, 0, 0.08);
+  --gradient-brand: linear-gradient(135deg, hsl(252 94% 62%), hsl(198 92% 54%), hsl(152 70% 48%));
+  --gradient-surface: linear-gradient(180deg, color-mix(in oklab, var(--card) 96%, var(--foreground) 4%), color-mix(in oklab, var(--card) 90%, transparent));
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: hsl(224 28% 7%);
+  --foreground: hsl(210 20% 96%);
+  --muted: hsl(224 22% 10%);
+  --muted-foreground: hsl(215 18% 78%);
+  --card: hsl(224 24% 9%);
+  --card-foreground: hsl(210 20% 96%);
+  --border: hsl(224 18% 16%);
+  --input: hsl(224 18% 16%);
+  --ring: hsl(var(--brand-hue) 98% 66%);
+  --accent: hsl(196 92% 52%);
+  --accent-foreground: hsl(210 20% 98%);
+  --destructive: hsl(0 84% 62%);
+  --destructive-foreground: hsl(210 20% 98%);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+  --shadow-md: 0 6px 16px rgba(0,0,0,0.45);
+  --shadow-lg: 0 18px 42px rgba(0,0,0,0.55);
+  --elevate-highlight: rgba(255, 255, 255, 0.08);
+  --elevate-shadow: rgba(0, 0, 0, 0.55);
+  --gradient-brand: linear-gradient(135deg, hsl(255 94% 64%), hsl(198 90% 56%), hsl(152 70% 50%));
+  --gradient-surface: linear-gradient(180deg, color-mix(in oklab, var(--card) 94%, var(--foreground) 6%), color-mix(in oklab, var(--card) 88%, transparent));
+}
+
 /* Tailwind theme mappings */
 @theme inline {
   --color-background: var(--background);
@@ -189,6 +235,14 @@ h1, h2, h3, h4, h5, h6 {
   transition: transform 80ms ease, background 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
   position: relative;
   overflow: hidden;
+}
+
+/* Compact icon button */
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 10px;
 }
 
 .btn:hover {

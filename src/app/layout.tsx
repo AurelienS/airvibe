@@ -19,6 +19,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-[--color-background] text-[--color-foreground]">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: `
+            (function() {
+              try {
+                var t = localStorage.getItem('theme');
+                if (!t) {
+                  var m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  t = m ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', t);
+              } catch (e) {}
+            })();
+          ` }}
+        />
+      </head>
       <body className={`${plusJakarta.variable} antialiased`}>{children}</body>
     </html>
   );

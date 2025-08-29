@@ -5,6 +5,7 @@ import { NavLinks } from "@/components/NavLinks";
 import { CurrentUserProvider } from "@/components/CurrentUserProvider";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default async function DashboardLayout({
   children,
@@ -19,6 +20,7 @@ export default async function DashboardLayout({
         left={<NavLinks />}
         right={
           <div className="navbar__section">
+            <ThemeToggle />
             <span className="text-sm text-[--color-muted-foreground]">{session.user?.email ?? 'inconnu'}</span>
             <form action={async () => {
               'use server';
