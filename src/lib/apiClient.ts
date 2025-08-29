@@ -28,6 +28,18 @@ export class ApiClient {
     if (!res.ok) throw new Error('Failed to fetch status');
     return res.json();
   }
+
+  async uploadFlights(formData: FormData): Promise<{ createdCount: number; skippedDuplicates: number }> {
+    const res = await fetch(`${this.base}/api/flights`, { method: 'POST', body: formData, credentials: 'include' });
+    if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+    return res.json();
+  }
+
+  async deleteFlight(id: string): Promise<{ ok: true }> {
+    const res = await fetch(`${this.base}/api/flights/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete flight');
+    return res.json();
+  }
 }
 
 export const apiClient = new ApiClient('');

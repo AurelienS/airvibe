@@ -26,7 +26,7 @@ async function fetchFlights(params: { year?: string; location?: string; cursor?:
 export function FlightsList({ flights }: { flights: Array<FlightRow> }) {
   const onDelete = useCallback(async (id: string) => {
     try {
-      await fetch(`/api/flights/${id}`, { method: 'DELETE' });
+      await apiClient.deleteFlight(id);
       window.dispatchEvent(new Event('flights:data-changed'));
     } catch {}
   }, []);

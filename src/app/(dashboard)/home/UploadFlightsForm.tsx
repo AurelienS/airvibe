@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { apiClient } from '@/lib/apiClient';
 
 export default function UploadFlightsForm() {
   const router = useRouter();
@@ -30,21 +31,11 @@ export default function UploadFlightsForm() {
     try {
       const formData = new FormData();
       for (const file of files) formData.append('files', file);
-      const res = await fetch('/api/flights', { method: 'POST', body: formData, credentials: 'include' });
-      if (!res.ok) {
-        const data: unknown = await res.json().catch(() => null);
-        let message = `Upload failed (${res.status})`;
-        if (data && typeof data === 'object' && 'error' in data) {
-          const errVal = (data as Record<string, unknown>).error;
-          if (typeof errVal === 'string') message = errVal;
-        }
-        throw new Error(message);
-      }
-      await res.json().catch(() => null);
+      await apiClient.uploadFlights(formData);
       try { window.dispatchEvent(new Event('flights:data-changed')); } catch {}
       try {
         window.dispatchEvent(new Event('flights:processing-start'));
-        await fetch('/api/flights/process', { method: 'POST', cache: 'no-store' });
+        await apiClient.processFlights();
       } catch {}
       setSelected([]);
       if (inputRef.current) inputRef.current.value = '';
@@ -63,21 +54,11 @@ export default function UploadFlightsForm() {
     try {
       const formData = new FormData();
       for (const file of selected) formData.append('files', file);
-      const res = await fetch('/api/flights', { method: 'POST', body: formData, credentials: 'include' });
-      if (!res.ok) {
-        const data: unknown = await res.json().catch(() => null);
-        let message = `Upload failed (${res.status})`;
-        if (data && typeof data === 'object' && 'error' in data) {
-          const errVal = (data as Record<string, unknown>).error;
-          if (typeof errVal === 'string') message = errVal;
-        }
-        throw new Error(message);
-      }
-      await res.json().catch(() => null);
+      await apiClient.uploadFlights(formData);
       try { window.dispatchEvent(new Event('flights:data-changed')); } catch {}
       try {
         window.dispatchEvent(new Event('flights:processing-start'));
-        await fetch('/api/flights/process', { method: 'POST', cache: 'no-store' });
+        await apiClient.processFlights();
       } catch {}
       setSelected([]);
       if (inputRef.current) inputRef.current.value = '';

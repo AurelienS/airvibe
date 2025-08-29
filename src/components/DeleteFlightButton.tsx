@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { apiClient } from '@/lib/apiClient';
 
 export function DeleteFlightButton({ flightId }: { flightId: string }) {
   const router = useRouter();
@@ -11,8 +12,7 @@ export function DeleteFlightButton({ flightId }: { flightId: string }) {
     if (loading) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/flights/${flightId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
+      await apiClient.deleteFlight(flightId);
       try {
         sessionStorage.setItem('flights:dirty', '1');
         window.dispatchEvent(new Event('flights:data-changed'));

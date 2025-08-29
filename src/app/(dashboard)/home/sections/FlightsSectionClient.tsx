@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { FlightListItem } from '@/components/FlightListItem';
+import { apiClient } from '@/lib/apiClient';
 
 type Row = {
   id: string;
@@ -19,7 +20,7 @@ export function FlightsSectionClient({ initial, email }: { initial: Row[]; email
   const [rows, setRows] = useState<Row[]>(initial);
   useEffect(() => {
     const handler = () => {
-      fetch(`/api/flights/list?limit=10`).then(r => r.json()).then(json => {
+      apiClient.listFlights({ limit: 10 }).then((json: any) => {
         const items = Array.isArray(json.items) ? json.items : [];
         setRows(items);
       }).catch(() => {});
