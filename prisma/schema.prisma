@@ -69,6 +69,12 @@ model Flight {
   distanceMeters      Int?
   altitudeMaxMeters   Int?
   faiDistanceMeters   Int?
+  // Derived metrics (computed during processing)
+  trackLengthMeters   Int?
+  avgSpeedKmh         Float?
+  maxAltGainMeters    Int?
+  maxClimbMs          Float?
+  maxSinkMs           Float?
   startAt             DateTime?
   endAt               DateTime?
   createdAt           DateTime @default(now())

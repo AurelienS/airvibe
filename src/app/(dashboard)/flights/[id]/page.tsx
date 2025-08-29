@@ -37,6 +37,10 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
   let takeoff: { lat: number; lon: number } | null = null;
   let landing: { lat: number; lon: number } | null = null;
   let path: Array<{ lat: number; lon: number }> = [];
+  // Derived metrics are computed during processing and stored in DB (to be added).
+
+  // Haversine not needed here anymore
+
   try {
     const parsed = IGCParser.parse(flight.rawIgc, { lenient: true });
     const { headers, pilot, gliderType, site, fixes } = parsed as any;
@@ -47,6 +51,8 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
       takeoff = { lat: first.latitude, lon: first.longitude };
       landing = { lat: last.latitude, lon: last.longitude };
       path = fixes.map((f: any) => ({ lat: f.latitude, lon: f.longitude }));
+
+      // No derived metric calculations here; done during processing
     }
     meta = {
       pilot: pilot ?? headers?.HFPLTPILOT ?? null,
@@ -57,6 +63,15 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
       recorder: headers?.HFDTE?.date ?? headers?.HFFXA ?? null,
     };
   } catch {}
+
+  // Fetch derived metrics via raw query to avoid client type skew during codegen transitions
+  const derived = (await prisma.$queryRaw<{
+    trackLengthMeters: number | null;
+    avgSpeedKmh: number | null;
+    maxAltGainMeters: number | null;
+    maxClimbMs: number | null;
+    maxSinkMs: number | null;
+  }[]>`SELECT trackLengthMeters, avgSpeedKmh, maxAltGainMeters, maxClimbMs, maxSinkMs FROM Flight WHERE id = ${p.id}`)[0] ?? null;
 
   const dateStr = new Date((flight.startAt ?? flight.createdAt)).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -74,6 +89,7 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
               <p><span className="text-[--color-muted-foreground]">Durée:</span> {formatDuration(flight.durationSeconds)}</p>
               <p><span className="text-[--color-muted-foreground]">Distance:</span> {formatDistance(flight.distanceMeters)}</p>
               <p><span className="text-[--color-muted-foreground]">Altitude max:</span> {formatAltitude(flight.altitudeMaxMeters)}</p>
+              <p><span className="text-[--color-muted-foreground]">Vitesse moyenne:</span> {derived?.avgSpeedKmh != null ? `${derived.avgSpeedKmh.toFixed(1)} km/h` : '—'}</p>
             </div>
           </div>
 
@@ -103,6 +119,12 @@ export default async function FlightDetailPage({ params }: { params: Promise<{ i
               <li><span className="text-[--color-muted-foreground]">Atterrissage:</span> {landing ? `${landing.lat.toFixed(5)}, ${landing.lon.toFixed(5)}` : '—'}</li>
               <li><span className="text-[--color-muted-foreground]">Début:</span> {flight.startAt ? new Date(flight.startAt).toLocaleString('fr-FR') : '—'}</li>
               <li><span className="text-[--color-muted-foreground]">Fin:</span> {flight.endAt ? new Date(flight.endAt).toLocaleString('fr-FR') : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Longueur de trace (calculée):</span> {derived?.trackLengthMeters != null ? formatDistance(derived.trackLengthMeters) : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Écart trace vs distance:</span> {derived?.trackLengthMeters != null && flight.distanceMeters != null ? formatDistance(derived.trackLengthMeters - flight.distanceMeters) : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Écart trace vs FAI:</span> {derived?.trackLengthMeters != null && flight.faiDistanceMeters != null ? formatDistance(derived.trackLengthMeters - flight.faiDistanceMeters) : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Gain alt. max:</span> {derived?.maxAltGainMeters != null ? `${derived.maxAltGainMeters} m` : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Montée max:</span> {derived?.maxClimbMs != null ? `${derived.maxClimbMs.toFixed(2)} m/s` : '—'}</li>
+              <li><span className="text-[--color-muted-foreground]">Taux de chute max:</span> {derived?.maxSinkMs != null ? `${derived.maxSinkMs.toFixed(2)} m/s` : '—'}</li>
             </ul>
           </div>
           <div className="card p-4 rounded-xl">

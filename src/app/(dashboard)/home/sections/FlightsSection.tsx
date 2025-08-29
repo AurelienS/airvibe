@@ -42,7 +42,7 @@ export async function FlightsSection({ email, limit = 50 }: FlightsSectionProps 
   return (
     <div className="card p-4 rounded-xl">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold">Vos vols</h2>
+        <h2 className="text-lg font-semibold">Vos derniers vols</h2>
         <div className="flex items-center gap-2">
           <form action={deleteAllFlights}>
             <button
