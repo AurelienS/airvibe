@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  airvibe:
+    build: .
+    container_name: airvibe-app
+    env_file:
+      - .env.production
+    volumes:
+      - /mnt/data/airvibe/data:/app/prisma
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - traefik_default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.airvibe.rule=Host(`airvibe.codeas.me`)"
+      - "traefik.http.routers.airvibe.entrypoints=websecure"
+      - "traefik.http.routers.airvibe.tls.certresolver=letsencrypt"
+      - "traefik.http.services.airvibe.loadbalancer.server.port=3000"
+
+networks:
+  traefik_default:
+    external: true
