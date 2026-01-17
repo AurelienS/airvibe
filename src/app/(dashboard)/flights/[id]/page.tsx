@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import IGCParser from "igc-parser";
 import { FlightMap } from "@/components/FlightMap";
@@ -7,31 +6,14 @@ import { StatList } from "@/components/StatList";
 import { BackButton } from "@/components/BackButton";
 import { DeleteFlightButton } from "@/components/DeleteFlightButton";
 import { Button } from "@/components/ui/Button";
+import { getCurrentUserOrThrow } from "@/lib/users";
+import { getFlightForUser } from "@/services/flights";
+import { prisma } from "@/lib/db";
 
 export default async function FlightDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  const email = session?.user?.email ?? null;
-  if (!email) return notFound();
-
+  const user = await getCurrentUserOrThrow();
   const p = await params;
-
-  const flight = await prisma.flight.findFirst({
-    where: { id: p.id, user: { email } },
-    select: {
-      id: true,
-      filename: true,
-      createdAt: true,
-      startAt: true,
-      endAt: true,
-      processed: true,
-      location: true,
-      durationSeconds: true,
-      distanceMeters: true,
-      altitudeMaxMeters: true,
-      faiDistanceMeters: true,
-      rawIgc: true,
-    },
-  });
+  const flight = await getFlightForUser(user.id, p.id);
   if (!flight) return notFound();
 
   // Parse additional metadata from IGC

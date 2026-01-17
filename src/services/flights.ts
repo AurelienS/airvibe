@@ -66,4 +66,25 @@ export async function listLocationsForUser(userId: string, args: { year?: string
   return Array.from(new Set(rows.map(r => r.location).filter(Boolean) as string[])).sort();
 }
 
+export async function getFlightForUser(userId: string, flightId: string) {
+  const f = await prisma.flight.findFirst({
+    where: { id: flightId, userId },
+    select: {
+      id: true,
+      filename: true,
+      createdAt: true,
+      startAt: true,
+      endAt: true,
+      processed: true,
+      location: true,
+      durationSeconds: true,
+      distanceMeters: true,
+      altitudeMaxMeters: true,
+      faiDistanceMeters: true,
+      rawIgc: true,
+    },
+  });
+  return f;
+}
+
 
